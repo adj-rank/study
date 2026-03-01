@@ -14,17 +14,17 @@ body{
   font-size:16px;
 }
 
-/* 年度表示（カテゴリ名は表示しない） */
+/* 年度表示 */
 #titleArea{
   font-size:16px;
   margin-bottom:8px;
 }
 
-/* ★ 問題文だけスクロール（\n と \n\n 両対応） */
+/* 問題文だけスクロール（\n / \n\n 両対応） */
 #questionArea{
   font-size:16px;
   line-height:1.7;
-  white-space:pre-wrap;  /* \n と \n\n をそのまま表示 */
+  white-space:pre-wrap;
   border:1px solid #ccc;
   padding:10px;
   margin-bottom:15px;
@@ -32,12 +32,12 @@ body{
   overflow-y:auto;
 }
 
-/* 1つの空欄ブロック */
+/* 空欄ブロック */
 .answer-block{
   margin-bottom:12px;
 }
 
-/* 空欄ラベル＋選択は同じ行 */
+/* 空欄＋選択 同一行 */
 .answer-row{
   display:flex;
   align-items:center;
@@ -46,7 +46,6 @@ body{
 
 .answer-row label{
   min-width:60px;
-  font-size:16px;
 }
 
 /* 選択肢 */
@@ -56,14 +55,14 @@ select{
   font-size:16px;
 }
 
-/* 正解表示は下 */
+/* 正解表示（下） */
 .answer-result{
   margin-left:60px;
   font-size:16px;
   line-height:1.6;
 }
 
-/* ボタン */
+/* ボタン共通 */
 button{
   width:100%;
   margin:8px 0;
@@ -71,11 +70,22 @@ button{
   font-size:16px;
   border-radius:8px;
   border:none;
-  background:#007bff;
   color:#fff;
 }
 
-button.secondary{
+/* 解答ボタン（青） */
+#answerBtn{
+  background:#007bff;
+}
+
+/* ★ 解説ボタン（薄い緑） */
+#explainBtn{
+  background:#8fd19e;   /* 薄い緑 */
+  color:#000;           /* 黒文字で読みやすく */
+}
+
+/* 次・トップボタン */
+button.default{
   background:#6c757d;
 }
 
@@ -89,7 +99,7 @@ button:active{ opacity:0.85; }
 </head>
 <body>
 
-<!-- トップ画面（カテゴリだけ表示） -->
+<!-- トップ画面 -->
 <div id="topScreen">
   <h3>技術アジャスター試験問題</h3>
   <div id="categoryArea"></div>
@@ -103,10 +113,10 @@ button:active{ opacity:0.85; }
   <div id="answersArea"></div>
 
   <button id="answerBtn">解答</button>
-  <button id="explainBtn" class="secondary hidden">解説を見る</button>
+  <button id="explainBtn" class="hidden">解説を見る</button>
 
-  <button onclick="nextQuestion()">次の問題</button>
-  <button onclick="goTop()">トップへ戻る</button>
+  <button class="default" onclick="nextQuestion()">次の問題</button>
+  <button class="default" onclick="goTop()">トップへ戻る</button>
 </div>
 
 <script>
@@ -117,7 +127,7 @@ let currentIndex = 0;
 let selectedAnswers = [];
 let resultDivs = [];
 
-/* questions.json を読み込み */
+/* questions.json 読み込み */
 fetch("questions.json")
   .then(res => res.json())
   .then(data => {
@@ -125,37 +135,34 @@ fetch("questions.json")
     loadCategories();
   })
   .catch(err => {
-    console.error("questions.json の読み込みに失敗:", err);
-    alert("questions.json の読み込みに失敗しました。JSONの赤文字（構文エラー）を確認してください。");
+    alert("questions.json の読み込みに失敗しました。");
   });
 
-/* トップ画面：カテゴリ一覧 */
+/* カテゴリ表示 */
 function loadCategories(){
   const area = document.getElementById("categoryArea");
   area.innerHTML = "";
-
   const categories = [...new Set(questions.map(q => q.category))];
 
   categories.forEach(cat => {
     const btn = document.createElement("button");
     btn.textContent = cat;
+    btn.className = "default";
     btn.onclick = () => startQuiz(cat);
     area.appendChild(btn);
   });
 }
 
-/* カテゴリを選んで開始 */
+/* 開始 */
 function startQuiz(category){
   filteredQuestions = questions.filter(q => q.category === category);
   currentIndex = 0;
-
   document.getElementById("topScreen").classList.add("hidden");
   document.getElementById("quizScreen").classList.remove("hidden");
-
   showQuestion();
 }
 
-/* トップへ戻る */
+/* トップへ */
 function goTop(){
   document.getElementById("quizScreen").classList.add("hidden");
   document.getElementById("topScreen").classList.remove("hidden");
@@ -166,15 +173,11 @@ function showQuestion(){
   const q = filteredQuestions[currentIndex];
   if(!q) return;
 
-  // 年度だけ表示（カテゴリ名は表示しない）
   document.getElementById("titleArea").textContent = q.year + "年度";
-
-  // \n と \n\n を反映
   document.getElementById("questionArea").textContent = q.question;
 
   const answersDiv = document.getElementById("answersArea");
   answersDiv.innerHTML = "";
-
   document.getElementById("explainBtn").classList.add("hidden");
 
   selectedAnswers = new Array(q.answers.length).fill(null);
@@ -216,7 +219,7 @@ function showQuestion(){
   document.getElementById("explainBtn").onclick = () => goExplanation(q);
 }
 
-/* 解答チェック（正解は下に表示） */
+/* 解答 */
 function checkAnswer(q){
   q.answers.forEach((correct, i) => {
     if(selectedAnswers[i] === correct){
@@ -227,12 +230,10 @@ function checkAnswer(q){
       resultDivs[i].className = "answer-result wrong";
     }
   });
-
-  // 解説ボタン表示
   document.getElementById("explainBtn").classList.remove("hidden");
 }
 
-/* 解説ページへ（localStorageで受け渡し） */
+/* 解説ページへ */
 function goExplanation(q){
   localStorage.setItem("explanationData", JSON.stringify({
     year: q.year,
