@@ -1,1 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2025年度の解説</title>
 
+<style>
+body{
+  font-family:"ＭＳ 明朝","MS Mincho",serif;
+  padding:15px;
+  margin:0;
+  font-size:14px;
+}
+
+#title{
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+#explanation{
+  white-space:pre-wrap;
+  line-height:1.7;
+  border:1px solid #ccc;
+  padding:10px;
+}
+
+button{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  font-size:16px;
+}
+</style>
+</head>
+<body>
+
+<div id="title"></div>
+<div id="explanation"></div>
+
+<button onclick="history.back()">問題へ戻る</button>
+
+<script>
+const dataStr = localStorage.getItem("explanationData");
+
+if(!dataStr){
+  document.getElementById("title").textContent = "解説";
+  document.getElementById("explanation").textContent =
+    "解説データが見つかりません。\n\n必ず問題ページから「解説を見る」を押してください。";
+}else{
+  const data = JSON.parse(dataStr);
+  document.getElementById("title").textContent = data.year + "年度の解説";
+  document.getElementById("explanation").textContent = data.explanation;
+}
+</script>
+
+</body>
+</html>
