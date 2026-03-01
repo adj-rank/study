@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>模擬試験</title>
+<title>技術アジャスター試験問題</title>
 
 <style>
 body {
@@ -19,7 +19,7 @@ body {
 }
 
 #questionArea {
-  font-size: 17px;
+  font-size: 14px;
   line-height: 1.7;
   margin-bottom: 15px;
   white-space: pre-wrap; /* questions.json の \n を反映 */
@@ -65,9 +65,9 @@ select {
 </head>
 <body>
 
-<!-- トップ画面（カテゴリ選択） -->
+<!-- トップ画面 -->
 <div id="topScreen">
-  <h3>トップ画面</h3>
+  <h3>技術アジャスター試験問題</h3>
   <div id="categoryArea"></div>
 </div>
 
@@ -126,7 +126,7 @@ function goTop() {
 function showQuestion() {
   const q = filteredQuestions[currentIndex];
 
-  /* ★ 年度だけ表示 ★ */
+  /* 年度のみ表示（例：2025年度） */
   document.getElementById("titleArea").textContent =
     q.year + "年度";
 
