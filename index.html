@@ -18,10 +18,10 @@ h1 {
 }
 
 #questionArea {
-  font-size: 16px;   /* ← 問題文を小さく */
-  line-height: 1.6;
-  font-weight: normal; /* ← 太字にしない */
+  font-size: 16px;
+  line-height: 1.7;
   margin-bottom: 15px;
+  white-space: pre-wrap;
 }
 
 button {
@@ -57,19 +57,26 @@ select {
   font-weight: bold;
 }
 
+#categoryArea {
+  margin-top: 30px;
+}
+
 </style>
 </head>
 <body>
 
 <h1>試験対策アプリ</h1>
 
-<div id="categoryArea"></div>
 <hr>
+
 <div id="questionArea"></div>
 <div id="answersArea"></div>
 <div id="explanationArea"></div>
 <br>
 <button onclick="nextQuestion()">次の問題</button>
+
+<!-- 👇 一番下に移動 -->
+<div id="categoryArea"></div>
 
 <script>
 
@@ -96,6 +103,7 @@ function loadCategories() {
       filteredQuestions = questions.filter(q => q.category === cat);
       currentIndex = 0;
       showQuestion();
+      window.scrollTo(0,0); // 上にスクロール
     };
     categoryArea.appendChild(btn);
   });
@@ -111,7 +119,7 @@ function showQuestion() {
   const answersDiv = document.getElementById("answersArea");
   const explanationDiv = document.getElementById("explanationArea");
 
-  questionDiv.innerHTML = q.question;  // ← h3を削除（太字防止）
+  questionDiv.textContent = q.question;
   answersDiv.innerHTML = "";
   explanationDiv.innerHTML = "";
 
@@ -178,6 +186,7 @@ function nextQuestion() {
     currentIndex = 0;
   }
   showQuestion();
+  window.scrollTo(0,0);
 }
 
 </script>
