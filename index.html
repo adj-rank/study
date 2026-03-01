@@ -9,12 +9,19 @@
 body {
   font-family: sans-serif;
   padding: 15px;
-  font-size: 18px;
   margin: 0;
+  font-size: 16px;
 }
 
 h1 {
-  font-size: 22px;
+  font-size: 20px;
+}
+
+#questionArea {
+  font-size: 14px;   /* ← 問題文を小さく */
+  line-height: 1.6;
+  font-weight: normal; /* ← 太字にしない */
+  margin-bottom: 15px;
 }
 
 button {
@@ -22,7 +29,7 @@ button {
   width: 100%;
   margin: 8px 0;
   padding: 12px;
-  font-size: 18px;
+  font-size: 16px;
   border-radius: 8px;
   border: none;
   background-color: #007bff;
@@ -35,8 +42,8 @@ button:active {
 
 select {
   width: 100%;
-  padding: 10px;
-  font-size: 16px;
+  padding: 8px;
+  font-size: 14px;
   margin: 5px 0;
 }
 
@@ -48,10 +55,6 @@ select {
 .wrong {
   color: red;
   font-weight: bold;
-}
-
-#questionArea {
-  margin-bottom: 15px;
 }
 
 </style>
@@ -108,38 +111,10 @@ function showQuestion() {
   const answersDiv = document.getElementById("answersArea");
   const explanationDiv = document.getElementById("explanationArea");
 
-  questionDiv.innerHTML = "<h3>" + q.question + "</h3>";
+  questionDiv.innerHTML = q.question;  // ← h3を削除（太字防止）
   answersDiv.innerHTML = "";
   explanationDiv.innerHTML = "";
 
-  // ○×問題
-  if (q.type === "truefalse") {
-    ["○", "×"].forEach((label, index) => {
-      const btn = document.createElement("button");
-      btn.textContent = label;
-      btn.onclick = () => {
-        const userAnswer = index === 0;
-        showResult(userAnswer === q.answer);
-        explanationDiv.textContent = q.explanation;
-      };
-      answersDiv.appendChild(btn);
-    });
-  }
-
-  // 多択問題
-  if (q.type === "multiple") {
-    q.choices.forEach((choice, index) => {
-      const btn = document.createElement("button");
-      btn.textContent = choice;
-      btn.onclick = () => {
-        showResult(index === q.answer);
-        explanationDiv.textContent = q.explanation;
-      };
-      answersDiv.appendChild(btn);
-    });
-  }
-
-  // 5空欄問題
   if (q.type === "multi_blank") {
 
     let selectedAnswers = new Array(q.answers.length).fill(null);
@@ -194,14 +169,6 @@ function showQuestion() {
 
     answersDiv.appendChild(checkBtn);
   }
-}
-
-function showResult(isCorrect) {
-  const result = document.createElement("div");
-  result.innerHTML = isCorrect
-    ? "<span class='correct'>⭕ 正解！</span>"
-    : "<span class='wrong'>❌ 不正解</span>";
-  document.getElementById("answersArea").appendChild(result);
 }
 
 function nextQuestion() {
