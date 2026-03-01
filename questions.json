@@ -16,11 +16,4 @@
 "explanation": "正解はポリプロピレン。"
 },
   
-{
-"category": "トラック",
-"type": "truefalse",
-"question": "大型トラックは普通免許で運転できる。",
-"answer": false,
-"explanation": "大型免許が必要。"
-}
 ]
