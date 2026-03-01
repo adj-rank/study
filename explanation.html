@@ -23,7 +23,7 @@ body{
 #explainArea{
   font-size:16px;
   line-height:1.7;
-  white-space:pre-wrap;  /* \n を反映 */
+  white-space:pre-wrap;  /* 実改行(\n)を反映 */
   border:1px solid #ccc;
   padding:10px;
   max-height:70vh;
@@ -66,10 +66,12 @@ button:active{ opacity:0.85; }
 <button id="nextBtn">次の問題</button>
 
 <script>
-/*
-  index.html から localStorage に保存されている explanationData を読む
-  explanationData = { year, label, explanation, isLast }
-*/
+function normalizeNewlines(s){
+  return String(s ?? "")
+    .replace(/\\\\n/g, "\n")  // \\n → \n
+    .replace(/\\n/g, "\n");   // \n(文字列) → \n
+}
+
 const raw = localStorage.getItem("explanationData");
 if(!raw){
   alert("解説データがありません。トップから問題を開き直してください。");
@@ -84,35 +86,31 @@ try{
   location.href = "index.html";
 }
 
-// タイトル（年度＋級）
 const labelText = (data.label && String(data.label).trim() !== "") ? " " + data.label : "";
 document.getElementById("titleArea").textContent = (data.year || "") + "年度" + labelText + " 解説";
 
-// 解説本文
-document.getElementById("explainArea").textContent = data.explanation || "（解説は未入力です）";
+// ★ ここが重要：\\n を実改行に直して textContent へ
+document.getElementById("explainArea").textContent =
+  normalizeNewlines(data.explanation) || "（解説は未入力です）";
 
-// ボタン：問題に戻る（薄緑）
+// 問題に戻る（薄緑）
 document.getElementById("backBtn").onclick = () => {
-  // 戻るだけ（次の問題に進まない）
   location.href = "index.html";
 };
 
-// ボタン：次の問題 or トップへ戻る（青）
 const nextBtn = document.getElementById("nextBtn");
 const isLast = !!data.isLast;
 
 if(isLast){
   nextBtn.textContent = "トップへ戻る";
   nextBtn.onclick = () => {
-    // 次に進まずトップへ
     localStorage.removeItem("goNext");
-    localStorage.setItem("goTop", "1"); // （保険）index側で見るなら使える
+    localStorage.setItem("goTop", "1");
     location.href = "index.html";
   };
 }else{
   nextBtn.textContent = "次の問題";
   nextBtn.onclick = () => {
-    // index.html に「次へ」を指示
     localStorage.setItem("goNext", "1");
     location.href = "index.html";
   };
