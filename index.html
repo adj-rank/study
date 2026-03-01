@@ -14,7 +14,7 @@ body{
   font-size:16px;
 }
 
-/* ★トップ画面タイトル中央 */
+/* トップ画面タイトル中央 */
 #topScreen h3{
   text-align:center;
   margin:0 0 16px 0;
@@ -76,7 +76,7 @@ button{
 }
 button:active{ opacity:0.85; }
 
-/* ★解説ボタンだけ薄い緑 */
+/* 解説ボタンだけ薄い緑 */
 #explainBtn{
   background:#8fd19e;
   color:#000;
@@ -110,9 +110,9 @@ button:active{ opacity:0.85; }
   <!-- 解説（薄い緑） -->
   <button id="explainBtn" class="hidden">解説を見る</button>
 
-  <!-- 青 -->
+  <!-- 最後の問題の時は「次の問題」を消して「トップへ戻る」だけ表示 -->
   <button id="nextBtnInQuiz" onclick="nextQuestion()">次の問題</button>
-  <button onclick="goTop()">トップへ戻る</button>
+  <button id="topBtnInQuiz" class="hidden" onclick="goTop()">トップへ戻る</button>
 </div>
 
 <script>
@@ -132,7 +132,6 @@ fetch("questions.json")
   .then(data => {
     questions = data;
     loadCategories();
-
     // 解説ページの「次の問題」から戻ってきた時
     resumeFromExplanationIfNeeded();
   })
@@ -157,7 +156,7 @@ function loadCategories(){
 
 /* カテゴリを選んで開始 */
 function startQuiz(category){
-  currentCategory = category; // ★保存
+  currentCategory = category;
   localStorage.setItem("currentCategory", category);
 
   filteredQuestions = questions.filter(q => q.category === category);
@@ -233,6 +232,16 @@ function showQuestion(){
 
   document.getElementById("answerBtn").onclick = () => checkAnswer(q);
   document.getElementById("explainBtn").onclick = () => goExplanation(q);
+
+  // ★ 最後の問題なら「トップへ戻る」表示（次の問題は非表示）
+  const isLast = (currentIndex === filteredQuestions.length - 1);
+  if(isLast){
+    document.getElementById("nextBtnInQuiz").classList.add("hidden");
+    document.getElementById("topBtnInQuiz").classList.remove("hidden");
+  }else{
+    document.getElementById("nextBtnInQuiz").classList.remove("hidden");
+    document.getElementById("topBtnInQuiz").classList.add("hidden");
+  }
 }
 
 /* 解答チェック（正解は下に表示） */
@@ -254,7 +263,7 @@ function checkAnswer(q){
 
 /* 解説ページへ（localStorageで受け渡し） */
 function goExplanation(q){
-  // ★ 解説→次の問題で復帰できるように保存
+  // 解説→次の問題で復帰できるように保存
   localStorage.setItem("currentCategory", currentCategory || "");
   localStorage.setItem("currentIndex", String(currentIndex));
 
@@ -283,14 +292,10 @@ function resumeFromExplanationIfNeeded(){
   // フラグを消す
   localStorage.removeItem("goNext");
 
-  // 保存しておいたカテゴリ・インデックスを復元
   const cat = localStorage.getItem("currentCategory");
   const idxStr = localStorage.getItem("currentIndex");
 
-  if(!cat){
-    // カテゴリ不明なら何もしない（トップ画面のまま）
-    return;
-  }
+  if(!cat) return; // カテゴリ不明ならトップのまま
 
   currentCategory = cat;
   filteredQuestions = questions.filter(q => q.category === cat);
@@ -305,7 +310,6 @@ function resumeFromExplanationIfNeeded(){
   currentIndex = idx;
   localStorage.setItem("currentIndex", String(currentIndex));
 
-  // 画面を問題画面に
   document.getElementById("topScreen").classList.add("hidden");
   document.getElementById("quizScreen").classList.remove("hidden");
 
