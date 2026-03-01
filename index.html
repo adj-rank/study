@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>試験対策アプリ</title>
+<title>模擬試験</title>
 
 <style>
 body {
@@ -13,16 +13,16 @@ body {
   font-size: 16px;
 }
 
-h1 {
-  font-size: 20px;
-  text-align: center;
+#titleArea {
+  font-size: 16px;
+  margin-bottom: 10px;
 }
 
 #questionArea {
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1.7;
   margin-bottom: 15px;
-  white-space: pre-wrap;
+  white-space: pre-wrap; /* questions.json の \n を反映 */
 }
 
 button {
@@ -61,52 +61,50 @@ select {
 .hidden {
   display: none;
 }
-
 </style>
 </head>
 <body>
 
-<h1>試験対策アプリ</h1>
-
 <!-- トップ画面（カテゴリ選択） -->
 <div id="topScreen">
-  <h3>カテゴリを選択してください</h3>
+  <h3>トップ画面</h3>
   <div id="categoryArea"></div>
 </div>
 
 <!-- 問題画面 -->
 <div id="quizScreen" class="hidden">
+  <div id="titleArea"></div>
   <div id="questionArea"></div>
   <div id="answersArea"></div>
   <div id="explanationArea"></div>
-  <br>
+
   <button onclick="nextQuestion()">次の問題</button>
   <button onclick="goTop()">トップへ戻る</button>
 </div>
 
 <script>
-
 let questions = [];
 let filteredQuestions = [];
 let currentIndex = 0;
 
 fetch("questions.json")
-  .then(response => response.json())
+  .then(res => res.json())
   .then(data => {
     questions = data;
     loadCategories();
   });
 
 function loadCategories() {
-  const categoryArea = document.getElementById("categoryArea");
-  categoryArea.innerHTML = "";
+  const area = document.getElementById("categoryArea");
+  area.innerHTML = "";
+
   const categories = [...new Set(questions.map(q => q.category))];
 
   categories.forEach(cat => {
     const btn = document.createElement("button");
     btn.textContent = cat;
     btn.onclick = () => startQuiz(cat);
-    categoryArea.appendChild(btn);
+    area.appendChild(btn);
   });
 }
 
@@ -126,73 +124,63 @@ function goTop() {
 }
 
 function showQuestion() {
-
-  if (filteredQuestions.length === 0) return;
-
   const q = filteredQuestions[currentIndex];
 
-  const questionDiv = document.getElementById("questionArea");
-  const answersDiv = document.getElementById("answersArea");
-  const explanationDiv = document.getElementById("explanationArea");
+  /* ★ 年度だけ表示 ★ */
+  document.getElementById("titleArea").textContent =
+    q.year + "年度";
 
-  questionDiv.textContent = q.question;
-  answersDiv.innerHTML = "";
-  explanationDiv.innerHTML = "";
+  document.getElementById("questionArea").textContent = q.question;
+  document.getElementById("answersArea").innerHTML = "";
+  document.getElementById("explanationArea").innerHTML = "";
 
-  if (q.type === "multi_blank") {
+  let selectedAnswers = new Array(q.answers.length).fill(null);
+  let resultSpans = [];
 
-    let selectedAnswers = new Array(q.answers.length).fill(null);
-    let resultSpans = [];
+  q.answers.forEach((correctVal, index) => {
+    const row = document.createElement("div");
 
-    q.answers.forEach((correctVal, index) => {
+    const label = document.createElement("div");
+    label.textContent = "空欄" + (index + 1);
+    row.appendChild(label);
 
-      const row = document.createElement("div");
+    const select = document.createElement("select");
+    select.innerHTML =
+      "<option value=''>選択してください</option>" +
+      q.choices.map((choice, i) =>
+        "<option value='" + i + "'>" + choice + "</option>"
+      ).join("");
 
-      const label = document.createElement("div");
-      label.textContent = "空欄" + (index+1);
-      row.appendChild(label);
-
-      const select = document.createElement("select");
-      select.innerHTML =
-        "<option value=''>選択してください</option>" +
-        q.choices.map((choice, i) =>
-          "<option value='" + i + "'>" + choice + "</option>"
-        ).join("");
-
-      select.onchange = function () {
-        selectedAnswers[index] = parseInt(this.value);
-      };
-
-      row.appendChild(select);
-
-      const resultSpan = document.createElement("div");
-      row.appendChild(resultSpan);
-
-      resultSpans.push(resultSpan);
-
-      answersDiv.appendChild(row);
-    });
-
-    const checkBtn = document.createElement("button");
-    checkBtn.textContent = "解答";
-    checkBtn.onclick = function () {
-
-      q.answers.forEach((correctVal, i) => {
-        if (selectedAnswers[i] === correctVal) {
-          resultSpans[i].textContent = "⭕ 正解";
-          resultSpans[i].className = "correct";
-        } else {
-          resultSpans[i].textContent =
-            "❌ 正解: " + q.choices[correctVal];
-          resultSpans[i].className = "wrong";
-        }
-      });
-
-      explanationDiv.textContent = q.explanation;
+    select.onchange = function () {
+      selectedAnswers[index] = parseInt(this.value);
     };
 
-    answersDiv.appendChild(checkBtn);
-  }
+    row.appendChild(select);
+
+    const resultSpan = document.createElement("div");
+    row.appendChild(resultSpan);
+    resultSpans.push(resultSpan);
+
+    document.getElementById("answersArea").appendChild(row);
+  });
+
+  const checkBtn = document.createElement("button");
+  checkBtn.textContent = "解答";
+  checkBtn.onclick = function () {
+    q.answers.forEach((correctVal, i) => {
+      if (selectedAnswers[i] === correctVal) {
+        resultSpans[i].textContent = "⭕ 正解";
+        resultSpans[i].className = "correct";
+      } else {
+        resultSpans[i].textContent =
+          "❌ 正解: " + q.choices[correctVal];
+        resultSpans[i].className = "wrong";
+      }
+    });
+    document.getElementById("explanationArea").textContent = q.explanation;
+  };
+
+  document.getElementById("answersArea").appendChild(checkBtn);
 }
 
 function nextQuestion() {
@@ -202,7 +190,6 @@ function nextQuestion() {
   }
   showQuestion();
 }
-
 </script>
 
 </body>
