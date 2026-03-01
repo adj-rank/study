@@ -6,39 +6,67 @@
 <title>2025年度の解説</title>
 
 <style>
+/* 全体 */
 body{
-  font-family:"ＭＳ 明朝","MS Mincho",serif;
-  padding:15px;
+  font-family: sans-serif;   /* 問題ページと同じ */
   margin:0;
-  font-size:14px;
+  padding:0;
+  font-size:16px;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
 }
 
+/* タイトル */
 #title{
+  padding:12px 15px;
   font-weight:bold;
-  margin-bottom:10px;
+  border-bottom:1px solid #ccc;
 }
 
+/* ★ 解説本文：ここだけスクロール */
+#explanationWrapper{
+  flex:1;                    /* 残り領域をすべて使う */
+  overflow-y:auto;           /* 縦スクロール */
+  padding:15px;
+}
+
+/* 解説本文 */
 #explanation{
-  white-space:pre-wrap;
+  white-space:pre-wrap;      /* \n と \n\n 両対応 */
   line-height:1.7;
-  border:1px solid #ccc;
-  padding:10px;
+}
+
+/* 下部固定ボタン */
+#footer{
+  padding:10px 15px;
+  border-top:1px solid #ccc;
+  background:#fff;
 }
 
 button{
   width:100%;
-  margin-top:15px;
   padding:12px;
   font-size:16px;
+  border-radius:8px;
+  border:none;
 }
 </style>
 </head>
 <body>
 
+<!-- タイトル -->
 <div id="title"></div>
-<div id="explanation"></div>
 
-<button onclick="history.back()">問題へ戻る</button>
+<!-- ★ スクロールする解説本文 -->
+<div id="explanationWrapper">
+  <div id="explanation"></div>
+</div>
+
+<!-- 下部固定 -->
+<div id="footer">
+  <button onclick="history.back()">問題に戻る</button>
+</div>
 
 <script>
 const dataStr = localStorage.getItem("explanationData");
@@ -46,7 +74,7 @@ const dataStr = localStorage.getItem("explanationData");
 if(!dataStr){
   document.getElementById("title").textContent = "解説";
   document.getElementById("explanation").textContent =
-    "解説データが見つかりません。\n\n必ず問題ページから「解説を見る」を押してください。";
+    "解説データがありません。\n\n必ず問題ページから「解説を見る」を押してください。";
 }else{
   const data = JSON.parse(dataStr);
   document.getElementById("title").textContent = data.year + "年度の解説";
