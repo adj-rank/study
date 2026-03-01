@@ -1,83 +1,24 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2025年度の解説</title>
-
-<style>
-body{
-  font-family: sans-serif;
-  margin:0;
-  padding:0;
-  font-size:16px;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-}
-
-/* タイトル */
-#title{
-  padding:12px 15px;
-  font-weight:bold;
-  border-bottom:1px solid #ccc;
-}
-
-/* 解説本文（スクロール） */
-#explanationWrapper{
-  flex:1;
-  overflow-y:auto;
-  padding:15px;
-}
-
-#explanation{
-  white-space:pre-wrap;
-  line-height:1.7;
-}
-
-/* フッター */
-#footer{
-  padding:10px 15px;
-  border-top:1px solid #ccc;
-  background:#fff;
-}
-
-/* ★ 問題に戻る：薄い緑 */
-#backBtn{
-  width:100%;
-  padding:12px;
-  font-size:16px;
-  border-radius:8px;
-  border:none;
-  background:#8fd19e;
-  color:#000;
-}
-</style>
-</head>
-<body>
-
-<div id="title"></div>
-
-<div id="explanationWrapper">
-  <div id="explanation"></div>
-</div>
-
-<div id="footer">
-  <button id="backBtn" onclick="history.back()">問題に戻る</button>
-</div>
-
-<script>
-const dataStr = localStorage.getItem("explanationData");
-if(!dataStr){
-  document.getElementById("title").textContent = "解説";
-  document.getElementById("explanation").textContent =
-    "解説データがありません。\n\n問題ページから「解説を見る」を押してください。";
-}else{
-  const data = JSON.parse(dataStr);
-  document.getElementById("title").textContent = data.year + "年度の解説";
-  document.getElementById("explanation").textContent = data.explanation;
-}
-</script>
-
-</body>
-</html>
+[
+  {
+    "year": "2025",
+    "category": "自動車材料",
+    "type": "multi_blank",
+    "question": "皮膜処理の中でも、金属だけでなく樹脂部品などにも皮膜形成が可能な汎用的処理方法の一つが（ ① ）である。\n\n皮膜となる代表的な金属がニッケルであり、溶液中にニッケルイオンを還元剤とともに投入し、ニッケルを還元、析出させて皮膜を得る手法であるため、部位を選ばず膜厚が極めて均一になりやすく、複雑な形状や寸法精度を要する製品には最適である。\n\n同様に樹脂やセラミックなどにも皮膜形成が可能な処理方法が（ ② ）である。「乾式メッキ法」とも呼ばれ、一般に真空やガス雰囲気中で皮膜となる金属を加熱・熱分解させる手法であり、自動車ヘッドランプ反射部のアルミコーティングはよく知られている。\n\nなお皮膜金属を加熱する手法は他にもあり、それが（ ③ ）である。電極間に高電流を流して放電させ、そこに高温で膨張させた不活性ガスの流れに乗せて金属粉やセラミック粉を送り出す手法である。膜厚が厚く均一であり、シリンダ内壁への吹付けコーティングは実例として非常によく知られている。\n\n一方、皮膜処理の中でも特に化成処理に分類される代表的処理方法が（ ④ ）であり、皮膜対象となる代表的な金属がアルミ合金材である。単純な電解液中の電気分解であるが、アルミニウムの酸素との極めて高い反応性を利用するのが特徴であり、形成された皮膜は完全な絶縁皮膜となるため、テスタでも皮膜形成の有無を簡単に確認することが可能である。\n\nまた同様な化成処理の一つが（ ⑤ ）であり、金属素地表面に化学反応を利用し極めて薄い皮膜を生成する手法である。自動車部品における下塗り工程の前処理として非常によく知られており、耐食性や密着性を高めるだけでなく、鍛造などの金属塑性加工に利用すれば優れた潤滑剤の役割を担うことも可能である。",
+    "choices": [
+      "溶射",
+      "静電塗装",
+      "拡散浸透処理（拡散メッキ）",
+      "陽極酸化",
+      "蒸着メッキ",
+      "プラスチックライニング",
+      "溶融亜鉛メッキ",
+      "電着塗装",
+      "リン酸塩処理",
+      "クロメート処理",
+      "無電解メッキ",
+      "電気亜鉛メッキ"
+    ],
+    "answers": [10, 4, 0, 3, 8],
+    "explanation": "（フォント想定：16px・ゴシック）\n\n────────────────────\n写真記載の正解\n① サ\n② オ\n③ ア\n④ エ\n⑤ ケ\n────────────────────\n\n【第1問】\n\n1．正解\n① サ（無電解メッキ）\n\n2．根拠\n\n問題文のキーワードはこれだ。\n・ニッケルイオン\n・還元剤\n・溶液中\n・電気を使うとは書いていない\n・膜厚が極めて均一\n\nこれは典型的な無電解ニッケルメッキの説明。\n\n無電解メッキは、電気を使わず、還元剤の化学反応で金属を析出させる方法だ。\nそのため、電流分布に左右されず、複雑形状でも均一膜厚になる。\n\n3．解説\n\n電気ではなく\n薬品の力で\nニッケルをくっつける\n\nこれが無電解メッキだ。\n\n4．まとめポイント\n\n還元剤が出たら無電解。\n均一膜厚が決め手。\n\n────────────────────\n\n【第2問】\n\n② オ（蒸着メッキ）\n\n乾式・真空・ヘッドランプ。\nこの3点で蒸着を即断できる。\n\n────────────────────\n\n【第3問】\n\n③ ア（溶射）\n\n吹き付け・厚膜。\nこの連想で溶射。\n\n────────────────────\n\n【第4問】\n\n④ エ（陽極酸化）\n\nアルミ・電解・絶縁。\n\n────────────────────\n\n【第5問】\n\n⑤ ケ（リン酸塩処理）\n\n下塗り前処理・潤滑。\n\n────────────────────\n\n最後に先生から一言。\n\nこの問題はキーワード反射だ。\n用語と特徴を必ずセットで覚えろ。"
+  }
+]
