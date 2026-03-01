@@ -1,47 +1,98 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>技術アジャスター試験問題</title>
 
 <style>
-body{ font-family:sans-serif; padding:15px; margin:0; font-size:16px; }
+/* 全体 */
+body{
+  font-family: sans-serif;
+  padding:15px;
+  margin:0;
+  font-size:16px;
+}
 
-#titleArea{ font-size:16px; margin-bottom:8px; }
+/* ★トップ画面タイトルを中央 */
+#topScreen h3{
+  text-align:center;
+  margin:0 0 16px 0;
+}
+
+/* 年度表示（年度の後に 2級/3級/演習問題などlabelを付ける） */
+#titleArea{
+  font-size:16px;
+  margin-bottom:8px;
+}
 
 /* 問題文だけスクロール（\n / \n\n 両対応） */
 #questionArea{
-  font-size:16px; line-height:1.7; white-space:pre-wrap;
-  border:1px solid #ccc; padding:10px; margin-bottom:15px;
-  max-height:40vh; overflow-y:auto;
+  font-size:16px;
+  line-height:1.7;
+  white-space:pre-wrap;
+  border:1px solid #ccc;
+  padding:10px;
+  margin-bottom:15px;
+  max-height:40vh;
+  overflow-y:auto;
 }
 
+/* 空欄ブロック */
 .answer-block{ margin-bottom:12px; }
-.answer-row{ display:flex; align-items:center; gap:10px; }
+
+/* 空欄＋選択 同一行 */
+.answer-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
 .answer-row label{ min-width:60px; }
 
-select{ flex:1; padding:10px; font-size:16px; }
+/* 選択肢 */
+select{
+  flex:1;
+  padding:10px;
+  font-size:16px;
+}
 
-.answer-result{ margin-left:60px; font-size:16px; line-height:1.6; }
+/* 正解表示（下） */
+.answer-result{
+  margin-left:60px;
+  font-size:16px;
+  line-height:1.6;
+}
 
+/* ボタン共通：基本は青 */
 button{
-  width:100%; margin:8px 0; padding:12px; font-size:16px;
-  border-radius:8px; border:none; background:#007bff; color:#fff;
+  width:100%;
+  margin:8px 0;
+  padding:12px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  background:#007bff; /* 青 */
+  color:#fff;
 }
 button:active{ opacity:0.85; }
 
-/* 解説ボタンだけ薄い緑 */
-#explainBtn{ background:#8fd19e; color:#000; }
+/* ★解説ボタンだけ薄い緑 */
+#explainBtn{
+  background:#8fd19e;
+  color:#000;
+}
 
+/* 正誤 */
 .correct{ color:green; font-weight:bold; }
 .wrong{ color:red; font-weight:bold; }
+
 .hidden{ display:none; }
 </style>
 </head>
+
 <body>
 
-<!-- トップ画面 -->
+<!-- トップ画面（カテゴリだけ表示） -->
 <div id="topScreen">
   <h3>技術アジャスター試験問題</h3>
   <div id="categoryArea"></div>
@@ -64,44 +115,59 @@ button:active{ opacity:0.85; }
 let questions = [];
 let filteredQuestions = [];
 let currentIndex = 0;
+
 let selectedAnswers = [];
 let resultDivs = [];
 
+/* questions.json 読み込み */
 fetch("questions.json")
   .then(res => res.json())
-  .then(data => { questions = data; loadCategories(); })
-  .catch(() => alert("questions.json の読み込みに失敗しました。JSONの構文エラー（赤文字）を確認してください。"));
+  .then(data => {
+    questions = data;
+    loadCategories();
+  })
+  .catch(err => {
+    console.error(err);
+    alert("questions.json の読み込みに失敗しました。JSONの赤文字（構文エラー）を確認してください。");
+  });
 
+/* トップ画面：カテゴリ一覧 */
 function loadCategories(){
   const area = document.getElementById("categoryArea");
   area.innerHTML = "";
   const categories = [...new Set(questions.map(q => q.category))];
+
   categories.forEach(cat => {
     const btn = document.createElement("button");
-    btn.textContent = cat;
+    btn.textContent = cat;          // カテゴリ名
     btn.onclick = () => startQuiz(cat);
     area.appendChild(btn);
   });
 }
 
+/* カテゴリを選んで開始 */
 function startQuiz(category){
   filteredQuestions = questions.filter(q => q.category === category);
   currentIndex = 0;
+
   document.getElementById("topScreen").classList.add("hidden");
   document.getElementById("quizScreen").classList.remove("hidden");
+
   showQuestion();
 }
 
+/* トップへ戻る */
 function goTop(){
   document.getElementById("quizScreen").classList.add("hidden");
   document.getElementById("topScreen").classList.remove("hidden");
 }
 
+/* 問題表示 */
 function showQuestion(){
   const q = filteredQuestions[currentIndex];
   if(!q) return;
 
-  // ★ 年度の後に label を表示（無い場合は年度だけ）
+  // ★年度の後に label（2級/3級/演習問題など）を表示（無いなら年度だけ）
   const labelText = (q.label && String(q.label).trim() !== "") ? " " + q.label : "";
   document.getElementById("titleArea").textContent = q.year + "年度" + labelText;
 
@@ -129,10 +195,12 @@ function showQuestion(){
     select.innerHTML =
       "<option value=''>選択してください</option>" +
       q.choices.map((c, idx) => `<option value="${idx}">${c}</option>`).join("");
+
     select.onchange = () => {
       const v = select.value;
       selectedAnswers[i] = (v === "") ? null : parseInt(v, 10);
     };
+
     row.appendChild(select);
     block.appendChild(row);
 
@@ -148,6 +216,7 @@ function showQuestion(){
   document.getElementById("explainBtn").onclick = () => goExplanation(q);
 }
 
+/* 解答チェック（正解は下に表示） */
 function checkAnswer(q){
   q.answers.forEach((correct, i) => {
     if(selectedAnswers[i] === correct){
@@ -158,9 +227,12 @@ function checkAnswer(q){
       resultDivs[i].className = "answer-result wrong";
     }
   });
+
+  // 解説ボタン表示
   document.getElementById("explainBtn").classList.remove("hidden");
 }
 
+/* 解説ページへ（localStorageで受け渡し） */
 function goExplanation(q){
   localStorage.setItem("explanationData", JSON.stringify({
     year: q.year,
@@ -170,6 +242,7 @@ function goExplanation(q){
   location.href = "explanation.html";
 }
 
+/* 次の問題 */
 function nextQuestion(){
   currentIndex++;
   if(currentIndex >= filteredQuestions.length) currentIndex = 0;
