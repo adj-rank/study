@@ -3,30 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2025年度の解説</title>
+<title>解説</title>
 
 <style>
 body{
-  font-family: sans-serif;
-  margin:0;
-  padding:0;
+  font-family:sans-serif;
+  margin:0; padding:0;
   font-size:16px;
   height:100vh;
   display:flex;
   flex-direction:column;
 }
 
-/* タイトル */
 #title{
   padding:12px 15px;
   font-weight:bold;
   border-bottom:1px solid #ccc;
 }
 
-/* 解説本文（スクロール） */
 #explanationWrapper{
   flex:1;
-  overflow-y:auto;
+  overflow-y:auto;   /* ボタンより上だけスクロール */
   padding:15px;
 }
 
@@ -35,21 +32,19 @@ body{
   line-height:1.7;
 }
 
-/* フッター */
 #footer{
   padding:10px 15px;
   border-top:1px solid #ccc;
   background:#fff;
 }
 
-/* ★ 問題に戻る：薄い緑 */
 #backBtn{
   width:100%;
   padding:12px;
   font-size:16px;
   border-radius:8px;
   border:none;
-  background:#8fd19e;
+  background:#8fd19e; /* 薄い緑 */
   color:#000;
 }
 </style>
@@ -74,8 +69,9 @@ if(!dataStr){
     "解説データがありません。\n\n問題ページから「解説を見る」を押してください。";
 }else{
   const data = JSON.parse(dataStr);
-  document.getElementById("title").textContent = data.year + "年度の解説";
-  document.getElementById("explanation").textContent = data.explanation;
+  const labelText = (data.label && String(data.label).trim() !== "") ? " " + data.label : "";
+  document.getElementById("title").textContent = data.year + "年度" + labelText + " の解説";
+  document.getElementById("explanation").textContent = data.explanation || "";
 }
 </script>
 
