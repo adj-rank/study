@@ -65,7 +65,6 @@ button{
   background:#007bff;
   color:#fff;
 }
-button:active{ opacity:0.85; }
 
 #explainBtn{
   background:#8fd19e;
@@ -74,18 +73,19 @@ button:active{ opacity:0.85; }
 
 .correct{ color:green; font-weight:bold; }
 .wrong{ color:red; font-weight:bold; }
-
 .hidden{ display:none; }
 </style>
 </head>
 
 <body>
 
+<!-- トップ画面 -->
 <div id="topScreen">
   <h3>技術アジャスター試験問題</h3>
   <div id="categoryArea"></div>
 </div>
 
+<!-- 問題画面 -->
 <div id="quizScreen" class="hidden">
   <div id="titleArea"></div>
   <div id="questionArea"></div>
@@ -111,7 +111,6 @@ function scrollToTop(){
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
-/* JSONの \\n を本物の改行に戻す */
 function normalizeText(str){
   if(!str) return "";
   return str.replace(/\\n/g, "\n");
@@ -122,9 +121,8 @@ fetch("questions.json")
   .then(data => {
     questions = data;
     loadCategories();
-    resumeFromExplanationIfNeeded();
-  })
-  .catch(() => alert("questions.json の読み込みに失敗しました"));
+    restoreFromExplanation(); // ★ ここだけ
+  });
 
 function loadCategories(){
   const area = document.getElementById("categoryArea");
@@ -138,6 +136,37 @@ function loadCategories(){
     area.appendChild(btn);
   });
 }
+
+/* ====== ここが重要 ====== */
+function restoreFromExplanation(){
+  const mode = localStorage.getItem("returnMode");
+  if(!mode) return; // ★ なければ絶対トップ
+
+  localStorage.removeItem("returnMode");
+
+  const cat = localStorage.getItem("currentCategory");
+  let idx = parseInt(localStorage.getItem("currentIndex") || "0", 10);
+
+  if(!cat) return;
+
+  currentCategory = cat;
+  filteredQuestions = questions.filter(q => q.category === cat);
+
+  if(mode === "next") idx++;
+  if(idx >= filteredQuestions.length){
+    goTop();
+    return;
+  }
+
+  currentIndex = idx;
+
+  document.getElementById("topScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
+
+  scrollToTop();
+  showQuestion();
+}
+/* ======================= */
 
 function startQuiz(category){
   currentCategory = category;
@@ -164,9 +193,8 @@ function showQuestion(){
   const q = filteredQuestions[currentIndex];
   if(!q) return;
 
-  const labelText = q.label ? " " + q.label : "";
   document.getElementById("titleArea").textContent =
-    q.year + "年度" + labelText;
+    q.year + "年度" + (q.label ? " " + q.label : "");
 
   document.getElementById("questionArea").textContent =
     normalizeText(q.question);
@@ -194,9 +222,7 @@ function showQuestion(){
     const select = document.createElement("select");
     select.innerHTML =
       "<option value=''>選択してください</option>" +
-      q.choices.map((c, idx) =>
-        `<option value="${idx}">${c}</option>`
-      ).join("");
+      q.choices.map((c, idx) => `<option value="${idx}">${c}</option>`).join("");
 
     select.onchange = () => {
       selectedAnswers[i] = select.value === "" ? null : Number(select.value);
@@ -239,6 +265,7 @@ function checkAnswer(q){
 function goExplanation(q){
   localStorage.setItem("currentCategory", currentCategory);
   localStorage.setItem("currentIndex", String(currentIndex));
+  localStorage.setItem("returnMode", "back");
 
   localStorage.setItem("explanationData", JSON.stringify({
     year: q.year,
@@ -252,23 +279,6 @@ function goExplanation(q){
 function nextQuestion(){
   currentIndex++;
   localStorage.setItem("currentIndex", String(currentIndex));
-  scrollToTop();
-  showQuestion();
-}
-
-function resumeFromExplanationIfNeeded(){
-  const cat = localStorage.getItem("currentCategory");
-  const idx = parseInt(localStorage.getItem("currentIndex") || "0", 10);
-
-  if(!cat) return;
-
-  currentCategory = cat;
-  filteredQuestions = questions.filter(q => q.category === cat);
-  currentIndex = idx;
-
-  document.getElementById("topScreen").classList.add("hidden");
-  document.getElementById("quizScreen").classList.remove("hidden");
-
   scrollToTop();
   showQuestion();
 }
