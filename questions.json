@@ -38,6 +38,7 @@ fetch("questions.json")
 
 function loadCategories() {
   const categoryArea = document.getElementById("categoryArea");
+  categoryArea.innerHTML = "";
   const categories = [...new Set(questions.map(q => q.category))];
 
   categories.forEach(cat => {
@@ -54,14 +55,15 @@ function loadCategories() {
 
 function showQuestion() {
 
+  if (filteredQuestions.length === 0) return;
+
   const q = filteredQuestions[currentIndex];
-  if (!q) return;
 
   const questionDiv = document.getElementById("questionArea");
   const answersDiv = document.getElementById("answersArea");
   const explanationDiv = document.getElementById("explanationArea");
 
-  questionDiv.innerHTML = `<h3>${q.question}</h3>`;
+  questionDiv.innerHTML = "<h3>" + q.question + "</h3>";
   answersDiv.innerHTML = "";
   explanationDiv.innerHTML = "";
 
@@ -92,7 +94,7 @@ function showQuestion() {
     });
   }
 
-  // 🔥 5空欄問題（個別判定）
+  // 5空欄問題
   if (q.type === "multi_blank") {
 
     let selectedAnswers = new Array(q.answers.length).fill(null);
@@ -103,14 +105,14 @@ function showQuestion() {
       const row = document.createElement("div");
 
       const label = document.createElement("span");
-      label.textContent = `空欄${index+1} `;
+      label.textContent = "空欄" + (index+1) + " ";
       row.appendChild(label);
 
       const select = document.createElement("select");
       select.innerHTML =
-        `<option value="">選択してください</option>` +
+        "<option value=''>選択してください</option>" +
         q.choices.map((choice, i) =>
-          `<option value="${i}">${choice}</option>`
+          "<option value='" + i + "'>" + choice + "</option>"
         ).join("");
 
       select.onchange = function () {
@@ -154,12 +156,13 @@ function showQuestion() {
 function showResult(isCorrect) {
   const result = document.createElement("div");
   result.innerHTML = isCorrect
-    ? '<span class="correct">⭕ 正解！</span>'
-    : '<span class="wrong">❌ 不正解</span>';
+    ? "<span class='correct'>⭕ 正解！</span>"
+    : "<span class='wrong'>❌ 不正解</span>";
   document.getElementById("answersArea").appendChild(result);
 }
 
 function nextQuestion() {
+  if (filteredQuestions.length === 0) return;
   currentIndex++;
   if (currentIndex >= filteredQuestions.length) {
     currentIndex = 0;
