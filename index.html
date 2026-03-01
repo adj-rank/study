@@ -1,451 +1,321 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>技術アジャスター試験問題</title>
-  <style>
-    :root{
-      --blue:#1e88e5;
-      --green:#a5d6a7; /* 薄い緑 */
-      --border:#e5e7eb;
-      --text:#111827;
-      --muted:#6b7280;
-      --bg:#f8fafc;
-      --card:#ffffff;
-    }
-    *{box-sizing:border-box;}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-                   "Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo", sans-serif;
-      color:var(--text);
-      background:var(--bg);
-      font-size:16px; /* 指定：文字サイズ16想定 */
-    }
-    .wrap{
-      max-width:720px;
-      margin:0 auto;
-      padding:14px;
-    }
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:14px;
-      box-shadow: 0 1px 2px rgba(0,0,0,.04);
-    }
-    h1{
-      margin:10px 0 14px;
-      text-align:center; /* 指定：中央 */
-      font-size:20px;
-      font-weight:700;
-      letter-spacing:.02em;
-    }
-    .row{display:flex; gap:10px; flex-wrap:wrap;}
-    .meta{
-      color:var(--muted);
-      font-size:14px;
-      margin:6px 0 10px;
-      line-height:1.35;
-    }
-    .btn{
-      width:100%;
-      display:block;
-      padding:12px 14px;
-      border:0;
-      border-radius:10px;
-      cursor:pointer;
-      font-size:16px;
-      font-weight:600;
-      text-align:center;
-    }
-    .btn-blue{background:var(--blue); color:#fff;}
-    .btn-green{background:var(--green); color:#111;}
-    .btn-ghost{
-      background:#fff;
-      border:1px solid var(--border);
-      color:var(--text);
-      font-weight:600;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>技術アジャスター試験問題</title>
 
-    .stack{display:grid; gap:10px;}
-    .hidden{display:none !important;}
+<style>
+/* 全体 */
+body{
+  font-family:sans-serif;
+  padding:15px;
+  margin:0;
+  font-size:16px;
+}
 
-    /* 問題文：太字にしない + 読みやすく */
-    .questionBox{
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:12px;
-      background:#fff;
-      white-space:pre-wrap; /* \n を反映 */
-      line-height:1.6;
-      font-weight:400; /* 太字にしない */
-      max-height:48vh; /* 問題文だけスクロールしたい → ボックスで制限 */
-      overflow:auto;
-    }
+/* トップ画面タイトル中央 */
+#topScreen h3{
+  text-align:center;
+  margin:0 0 16px 0;
+}
 
-    .choicesGrid{
-      display:grid;
-      gap:10px;
-      margin-top:12px;
-    }
-    .blankRow{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:nowrap; /* 「空欄1」と選択を同じ行 */
-    }
-    .blankLabel{
-      min-width:72px;
-      font-weight:700;
-      color:var(--text);
-      font-size:15px;
-    }
-    select{
-      width:100%;
-      padding:10px 12px;
-      border:1px solid var(--border);
-      border-radius:10px;
-      font-size:16px;
-      background:#fff;
-    }
+/* 年度＋区分（年度の後に label を付ける） */
+#titleArea{
+  font-size:16px;
+  margin-bottom:8px;
+}
 
-    .resultBox{
-      margin-top:10px;
-      padding:10px 12px;
-      border:1px solid var(--border);
-      border-radius:10px;
-      background:#fff;
-      white-space:pre-wrap;
-      line-height:1.6;
-    }
-    .correct{border-color:#16a34a;}
-    .wrong{border-color:#dc2626;}
+/* 問題文だけスクロール（\n / \n\n 両対応） */
+#questionArea{
+  font-size:16px;
+  line-height:1.7;
+  white-space:pre-wrap;
+  border:1px solid #ccc;
+  padding:10px;
+  margin-bottom:15px;
+  max-height:40vh;
+  overflow-y:auto;
+}
 
-    .hr{
-      height:1px;
-      background:var(--border);
-      margin:12px 0;
-    }
+/* 空欄ブロック */
+.answer-block{ margin-bottom:12px; }
 
-    /* 解説ページ：本文だけスクロール（ボタンより上がスクロール） */
-    .explainScroll{
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:12px;
-      background:#fff;
-      white-space:pre-wrap;
-      line-height:1.65;
-      max-height:65vh;
-      overflow:auto;
-    }
+/* 空欄＋選択 同一行 */
+.answer-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.answer-row label{ min-width:60px; }
 
-    .footerSpace{height:6px;}
-  </style>
+/* 選択肢 */
+select{
+  flex:1;
+  padding:10px;
+  font-size:16px;
+}
+
+/* 正解表示（下） */
+.answer-result{
+  margin-left:60px;
+  font-size:16px;
+  line-height:1.6;
+}
+
+/* ボタン共通：基本は青 */
+button{
+  width:100%;
+  margin:8px 0;
+  padding:12px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  background:#007bff; /* 青 */
+  color:#fff;
+}
+button:active{ opacity:0.85; }
+
+/* 解説ボタンだけ薄い緑 */
+#explainBtn{
+  background:#8fd19e;
+  color:#000;
+}
+
+/* 正誤 */
+.correct{ color:green; font-weight:bold; }
+.wrong{ color:red; font-weight:bold; }
+
+.hidden{ display:none; }
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <h1>技術アジャスター試験問題</h1>
 
-    <!-- TOP -->
-    <div id="viewTop" class="card">
-      <div class="meta">
-        トップ画面でカテゴリを選び、問題を開始します。<br>
-        ※成績保存なし／5人程度で利用OK（GitHub Pages）
-      </div>
-      <div id="categoryButtons" class="stack"></div>
-      <div class="footerSpace"></div>
-    </div>
+<!-- トップ画面（カテゴリだけ表示） -->
+<div id="topScreen">
+  <h3>技術アジャスター試験問題</h3>
+  <div id="categoryArea"></div>
+</div>
 
-    <!-- QUESTION -->
-    <div id="viewQuestion" class="card hidden">
-      <div id="qMeta" class="meta"></div>
-      <div id="qText" class="questionBox"></div>
+<!-- 問題画面 -->
+<div id="quizScreen" class="hidden">
+  <div id="titleArea"></div>
+  <div id="questionArea"></div>
+  <div id="answersArea"></div>
 
-      <div id="qChoices" class="choicesGrid"></div>
+  <!-- 解答（青） -->
+  <button id="answerBtn">解答</button>
 
-      <div class="hr"></div>
+  <!-- 解説（薄い緑） -->
+  <button id="explainBtn" class="hidden">解説を見る</button>
 
-      <div class="stack">
-        <button id="btnAnswer" class="btn btn-blue" onclick="checkAnswer()">解答</button>
-        <!-- 解答後：解説ボタン（薄緑）を出す -->
-        <button id="btnExplanation" class="btn btn-green hidden" onclick="openExplanation()">解説</button>
-        <!-- 解答後：次の問題 or トップへ戻る（青） -->
-        <button id="btnNext" class="btn btn-blue hidden" onclick="goNextOrTop()">次の問題</button>
-        <!-- 常に下：トップへ（トップ画面リンク） -->
-        <button class="btn btn-ghost" onclick="showTopPage()">トップへ</button>
-      </div>
+  <!-- 最後の問題の時は「次の問題」を消して「トップへ戻る」だけ表示 -->
+  <button id="nextBtnInQuiz" onclick="nextQuestion()">次の問題</button>
+  <button id="topBtnInQuiz" class="hidden" onclick="goTop()">トップへ戻る</button>
+</div>
 
-      <div id="qResult" class="resultBox hidden"></div>
-    </div>
+<script>
+let questions = [];
+let filteredQuestions = [];
+let currentIndex = 0;
 
-    <!-- EXPLANATION -->
-    <div id="viewExplanation" class="card hidden">
-      <div id="eMeta" class="meta"></div>
+let selectedAnswers = [];
+let resultDivs = [];
 
-      <!-- ボタンより上だけスクロール -->
-      <div id="eText" class="explainScroll"></div>
+/* 今選んでいるカテゴリ（解説→次の問題で戻る用） */
+let currentCategory = null;
 
-      <div class="hr"></div>
+/* questions.json 読み込み */
+fetch("questions.json")
+  .then(res => res.json())
+  .then(data => {
+    questions = data;
+    loadCategories();
+    // 解説ページの「次の問題」から戻ってきた時
+    resumeFromExplanationIfNeeded();
+  })
+  .catch(err => {
+    console.error(err);
+    alert("questions.json の読み込みに失敗しました。JSONの赤文字（構文エラー）を確認してください。");
+  });
 
-      <div class="stack" id="eButtons">
-        <button class="btn btn-green" onclick="backToQuestion()">問題に戻る</button>
-        <!-- 最後の問題ならトップ、そうでなければ次の問題（青） -->
-        <button id="eNextBtn" class="btn btn-blue" onclick="goNextFromExplanation()">次の問題</button>
-      </div>
-    </div>
-  </div>
+/* トップ画面：カテゴリ一覧 */
+function loadCategories(){
+  const area = document.getElementById("categoryArea");
+  area.innerHTML = "";
+  const categories = [...new Set(questions.map(q => q.category))];
 
-  <script>
-    // ====== 状態 ======
-    let questions = [];
-    let filtered = [];
-    let currentIndex = 0;        // filtered 内のindex
-    let selectedCategory = null; // トップで選んだカテゴリ
-    let userAnswers = [];        // multi_blank の選択結果（index配列）
-    let answered = false;
+  categories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.textContent = cat;
+    btn.onclick = () => startQuiz(cat);
+    area.appendChild(btn);
+  });
+}
 
-    // ====== 起動 ======
-    loadQuestions();
+/* カテゴリを選んで開始 */
+function startQuiz(category){
+  currentCategory = category;
+  localStorage.setItem("currentCategory", category);
 
-    async function loadQuestions(){
-      try{
-        const res = await fetch("questions.json?ts=" + Date.now());
-        if(!res.ok) throw new Error("questions.json を読み込めません: " + res.status);
-        questions = await res.json();
-        buildTopCategories();
-      }catch(err){
-        document.getElementById("categoryButtons").innerHTML =
-          `<div class="resultBox wrong">読み込みエラー：${escapeHtml(String(err))}\n\n・questions.json が同じフォルダにあるか\n・JSON の赤文字（構文エラー）がないか\nを確認してください。</div>`;
-      }
+  filteredQuestions = questions.filter(q => q.category === category);
+
+  // 初期は先頭
+  currentIndex = 0;
+  localStorage.setItem("currentIndex", String(currentIndex));
+
+  document.getElementById("topScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
+
+  showQuestion();
+}
+
+/* トップへ戻る */
+function goTop(){
+  document.getElementById("quizScreen").classList.add("hidden");
+  document.getElementById("topScreen").classList.remove("hidden");
+}
+
+/* 問題表示 */
+function showQuestion(){
+  const q = filteredQuestions[currentIndex];
+  if(!q) return;
+
+  // 年度の後に label（2級/3級/演習問題など）を表示（無いなら年度だけ）
+  const labelText = (q.label && String(q.label).trim() !== "") ? " " + q.label : "";
+  document.getElementById("titleArea").textContent = q.year + "年度" + labelText;
+
+  document.getElementById("questionArea").textContent = q.question;
+
+  const answersDiv = document.getElementById("answersArea");
+  answersDiv.innerHTML = "";
+
+  // ボタン状態を初期化（解答ボタンは出す／解説ボタンは隠す）
+  document.getElementById("answerBtn").classList.remove("hidden");
+  document.getElementById("explainBtn").classList.add("hidden");
+
+  selectedAnswers = new Array(q.answers.length).fill(null);
+  resultDivs = [];
+
+  q.answers.forEach((_, i) => {
+    const block = document.createElement("div");
+    block.className = "answer-block";
+
+    const row = document.createElement("div");
+    row.className = "answer-row";
+
+    const label = document.createElement("label");
+    label.textContent = "空欄" + (i + 1);
+    row.appendChild(label);
+
+    const select = document.createElement("select");
+    select.innerHTML =
+      "<option value=''>選択してください</option>" +
+      q.choices.map((c, idx) => `<option value="${idx}">${c}</option>`).join("");
+
+    select.onchange = () => {
+      const v = select.value;
+      selectedAnswers[i] = (v === "") ? null : parseInt(v, 10);
+    };
+
+    row.appendChild(select);
+    block.appendChild(row);
+
+    const result = document.createElement("div");
+    result.className = "answer-result";
+    block.appendChild(result);
+
+    resultDivs.push(result);
+    answersDiv.appendChild(block);
+  });
+
+  document.getElementById("answerBtn").onclick = () => checkAnswer(q);
+  document.getElementById("explainBtn").onclick = () => goExplanation(q);
+
+  // ★ 最後の問題なら「トップへ戻る」表示（次の問題は非表示）
+  const isLast = (currentIndex === filteredQuestions.length - 1);
+  if(isLast){
+    document.getElementById("nextBtnInQuiz").classList.add("hidden");
+    document.getElementById("topBtnInQuiz").classList.remove("hidden");
+  }else{
+    document.getElementById("nextBtnInQuiz").classList.remove("hidden");
+    document.getElementById("topBtnInQuiz").classList.add("hidden");
+  }
+}
+
+/* 解答チェック（正解は下に表示） */
+function checkAnswer(q){
+  q.answers.forEach((correct, i) => {
+    if(selectedAnswers[i] === correct){
+      resultDivs[i].textContent = "⭕ 正解";
+      resultDivs[i].className = "answer-result correct";
+    }else{
+      resultDivs[i].textContent = "❌ 正解：" + q.choices[correct];
+      resultDivs[i].className = "answer-result wrong";
     }
+  });
 
-    // ====== TOP ======
-    function buildTopCategories(){
-      // カテゴリはトップ画面のみ表示
-      const set = new Set();
-      for(const q of questions){
-        if(q.category) set.add(q.category);
-      }
-      const cats = Array.from(set);
+  // ★ 解答ボタンを消し、解説ボタンを表示
+  document.getElementById("answerBtn").classList.add("hidden");
+  document.getElementById("explainBtn").classList.remove("hidden");
+}
 
-      const box = document.getElementById("categoryButtons");
-      box.innerHTML = "";
-      if(cats.length === 0){
-        box.innerHTML = `<div class="resultBox">カテゴリが見つかりません（questions.json の category を確認）</div>`;
-        return;
-      }
+/* 解説ページへ（localStorageで受け渡し） */
+function goExplanation(q){
+  // 解説→次の問題で復帰できるように保存
+  localStorage.setItem("currentCategory", currentCategory || "");
+  localStorage.setItem("currentIndex", String(currentIndex));
 
-      // ボタンを下に置きたい → TOPカードの一番下に既に設置済み
-      for(const c of cats){
-        const btn = document.createElement("button");
-        btn.className = "btn btn-blue";
-        btn.textContent = c;
-        btn.onclick = () => startCategory(c);
-        box.appendChild(btn);
-      }
-    }
+  localStorage.setItem("explanationData", JSON.stringify({
+    year: q.year,
+    label: q.label || "",
+    explanation: q.explanation
+  }));
 
-    function startCategory(cat){
-      selectedCategory = cat;
-      filtered = questions.filter(q => q.category === cat);
-      currentIndex = 0;
-      showQuestion(currentIndex);
-    }
+  location.href = "explanation.html";
+}
 
-    function showTopPage(){
-      showView("top");
-      selectedCategory = null;
-      filtered = [];
-      currentIndex = 0;
-      userAnswers = [];
-      answered = false;
-      // 解説ページから戻った時に、またカテゴリ選び直し
-    }
+/* 次の問題 */
+function nextQuestion(){
+  currentIndex++;
+  if(currentIndex >= filteredQuestions.length) currentIndex = 0;
 
-    // ====== QUESTION VIEW ======
-    function showQuestion(idx){
-      if(!filtered || filtered.length === 0){
-        showTopPage();
-        return;
-      }
-      currentIndex = idx;
-      const q = filtered[currentIndex];
+  localStorage.setItem("currentIndex", String(currentIndex));
+  showQuestion();
+}
 
-      answered = false;
-      userAnswers = [];
+/* 解説ページの「次の問題」から戻ってきた場合に復帰 */
+function resumeFromExplanationIfNeeded(){
+  if(localStorage.getItem("goNext") !== "1") return;
 
-      // UI reset
-      document.getElementById("qResult").className = "resultBox hidden";
-      document.getElementById("qResult").textContent = "";
-      document.getElementById("btnAnswer").classList.remove("hidden");
-      document.getElementById("btnExplanation").classList.add("hidden"); // 解答後に出す
-      document.getElementById("btnNext").classList.add("hidden");        // 解答後に出す
+  // フラグを消す
+  localStorage.removeItem("goNext");
 
-      // meta
-      document.getElementById("qMeta").textContent =
-        `${q.year || ""} ${q.label || ""} / ${q.category || ""}  （${currentIndex + 1} / ${filtered.length}）`;
+  const cat = localStorage.getItem("currentCategory");
+  const idxStr = localStorage.getItem("currentIndex");
 
-      // question
-      document.getElementById("qText").textContent = q.question || "";
+  if(!cat) return; // カテゴリ不明ならトップのまま
 
-      // choices
-      renderChoices(q);
+  currentCategory = cat;
+  filteredQuestions = questions.filter(q => q.category === cat);
 
-      showView("question");
-    }
+  let idx = parseInt(idxStr || "0", 10);
+  if(isNaN(idx)) idx = 0;
 
-    function renderChoices(q){
-      const box = document.getElementById("qChoices");
-      box.innerHTML = "";
+  // 「次の問題」なので +1
+  idx = idx + 1;
+  if(idx >= filteredQuestions.length) idx = 0;
 
-      if(q.type !== "multi_blank"){
-        box.innerHTML = `<div class="resultBox">このテンプレは multi_blank に対応しています（type を確認）。</div>`;
-        return;
-      }
+  currentIndex = idx;
+  localStorage.setItem("currentIndex", String(currentIndex));
 
-      const blankCount = Array.isArray(q.answers) ? q.answers.length : 1;
-      for(let i=0;i<blankCount;i++){
-        const row = document.createElement("div");
-        row.className = "blankRow";
+  document.getElementById("topScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
 
-        const label = document.createElement("div");
-        label.className = "blankLabel";
-        label.textContent = `空欄${i+1}`;
+  showQuestion();
+}
+</script>
 
-        const sel = document.createElement("select");
-        sel.dataset.blankIndex = String(i);
-        sel.innerHTML = `<option value="">選択してください</option>` + (q.choices || []).map((c, idx) =>
-          `<option value="${idx}">${c}</option>`
-        ).join("");
-
-        sel.onchange = () => {
-          const bi = Number(sel.dataset.blankIndex);
-          const v = sel.value === "" ? null : Number(sel.value);
-          userAnswers[bi] = v;
-        };
-
-        row.appendChild(label);
-        row.appendChild(sel);
-        box.appendChild(row);
-      }
-    }
-
-    function checkAnswer(){
-      const q = filtered[currentIndex];
-      if(q.type !== "multi_blank") return;
-
-      const expected = Array.isArray(q.answers) ? q.answers : [q.answers];
-
-      // 未選択チェック
-      for(let i=0;i<expected.length;i++){
-        if(userAnswers[i] === undefined || userAnswers[i] === null){
-          showResult("すべての空欄を選択してください。", false);
-          return;
-        }
-      }
-
-      // 判定
-      let ok = true;
-      for(let i=0;i<expected.length;i++){
-        if(Number(userAnswers[i]) !== Number(expected[i])){ ok = false; break; }
-      }
-
-      // 正解表示（指定：正解は空欄・選択の下に）
-      const correctText = expected.map((ansIdx, i) => {
-        const choiceText = (q.choices && q.choices[ansIdx] !== undefined) ? q.choices[ansIdx] : "";
-        return `空欄${i+1}：${choiceText}`;
-      }).join("\n");
-
-      const msg = (ok ? "正解\n" : "不正解\n") + "\n【正解】\n" + correctText;
-      showResult(msg, ok);
-
-      answered = true;
-
-      // 解答を押した後に解答ボタンを出さない
-      document.getElementById("btnAnswer").classList.add("hidden");
-
-      // 解説ボタン（薄緑）を出す
-      document.getElementById("btnExplanation").classList.remove("hidden");
-
-      // 次の問題（青） or トップへ戻る（最後なら）を出す
-      const btnNext = document.getElementById("btnNext");
-      btnNext.classList.remove("hidden");
-      btnNext.textContent = (currentIndex === filtered.length - 1) ? "トップへ戻る" : "次の問題";
-    }
-
-    function showResult(text, isCorrect){
-      const box = document.getElementById("qResult");
-      box.classList.remove("hidden");
-      box.textContent = text;
-      box.classList.remove("correct","wrong");
-      box.classList.add(isCorrect ? "correct" : "wrong");
-    }
-
-    function openExplanation(){
-      const q = filtered[currentIndex];
-      const title = `${q.year || ""} ${q.label || ""} / ${q.category || ""}  （${currentIndex + 1} / ${filtered.length}）`;
-      document.getElementById("eMeta").textContent = title;
-
-      // 解説本文（\n反映）
-      document.getElementById("eText").textContent = q.explanation || "（解説は未入力です）";
-
-      // 解説ページの「次」ボタン：最後ならトップへ
-      const isLast = currentIndex === filtered.length - 1;
-      const eNext = document.getElementById("eNextBtn");
-      eNext.textContent = isLast ? "トップへ戻る" : "次の問題";
-      eNext.className = "btn btn-blue";
-      eNext.onclick = () => {
-        if(isLast) showTopPage();
-        else showQuestion(currentIndex + 1);
-      };
-
-      showView("explanation");
-
-      // 解説のスクロール位置を上へ
-      document.getElementById("eText").scrollTop = 0;
-    }
-
-    function backToQuestion(){
-      // 問題に戻る（同じ問題）
-      showView("question");
-    }
-
-    function goNextOrTop(){
-      const isLast = currentIndex === filtered.length - 1;
-      if(isLast) showTopPage();
-      else showQuestion(currentIndex + 1);
-    }
-
-    function goNextFromExplanation(){
-      // openExplanation で onclick を差し替えているので、ここは保険
-      const isLast = currentIndex === filtered.length - 1;
-      if(isLast) showTopPage();
-      else showQuestion(currentIndex + 1);
-    }
-
-    // ====== View Switch ======
-    function showView(name){
-      const top = document.getElementById("viewTop");
-      const qv  = document.getElementById("viewQuestion");
-      const ev  = document.getElementById("viewExplanation");
-
-      top.classList.add("hidden");
-      qv.classList.add("hidden");
-      ev.classList.add("hidden");
-
-      if(name === "top") top.classList.remove("hidden");
-      if(name === "question") qv.classList.remove("hidden");
-      if(name === "explanation") ev.classList.remove("hidden");
-    }
-
-    // ====== Utils ======
-    function escapeHtml(s){
-      return s.replace(/[&<>"']/g, c => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
-      }[c]));
-    }
-  </script>
 </body>
 </html>
