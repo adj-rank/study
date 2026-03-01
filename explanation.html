@@ -1,109 +1,122 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>解説</title>
 
 <style>
 body{
   font-family:sans-serif;
-  margin:0;
-  padding:0;
-  font-size:16px;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-}
-
-/* タイトル */
-#title{
-  padding:12px 15px;
-  font-weight:bold;
-  border-bottom:1px solid #ccc;
-}
-
-/* 解説本文（ここだけスクロール） */
-#explanationWrapper{
-  flex:1;
-  overflow-y:auto;
   padding:15px;
+  margin:0;
+  font-size:16px;
 }
 
-#explanation{
-  white-space:pre-wrap;
+/* タイトル（年度＋級） */
+#titleArea{
+  font-size:16px;
+  margin-bottom:10px;
+}
+
+/* 解説本文：ボタンより上だけスクロール */
+#explainArea{
+  font-size:16px;
   line-height:1.7;
+  white-space:pre-wrap;  /* \n を反映 */
+  border:1px solid #ccc;
+  padding:10px;
+  max-height:70vh;
+  overflow-y:auto;
+  margin-bottom:12px;
 }
 
-/* フッター */
-#footer{
-  padding:10px 15px;
-  border-top:1px solid #ccc;
-  background:#fff;
-}
-
-/* ボタン共通 */
-.footer-btn{
+/* ボタン共通（基本は青） */
+button{
   width:100%;
+  margin:8px 0;
   padding:12px;
   font-size:16px;
   border-radius:8px;
   border:none;
-  margin-bottom:8px;
+  background:#007bff; /* 青 */
+  color:#fff;
 }
+button:active{ opacity:0.85; }
 
-/* 問題に戻る（薄い緑） */
+/* 薄い緑（問題に戻るだけ） */
 #backBtn{
   background:#8fd19e;
   color:#000;
 }
 
-/* 次の問題（青） */
-#nextBtn{
-  background:#007bff;
-  color:#fff;
-}
+.hidden{ display:none; }
 </style>
 </head>
+
 <body>
 
-<div id="title"></div>
+<div id="titleArea"></div>
+<div id="explainArea"></div>
 
-<div id="explanationWrapper">
-  <div id="explanation"></div>
-</div>
+<!-- 問題に戻る（薄い緑） -->
+<button id="backBtn">問題に戻る</button>
 
-<div id="footer">
-  <button id="backBtn" class="footer-btn">問題に戻る</button>
-  <button id="nextBtn" class="footer-btn">次の問題</button>
-</div>
+<!-- 通常：次の問題（青）／最後：トップへ戻る（青） -->
+<button id="nextBtn">次の問題</button>
 
 <script>
-const dataStr = localStorage.getItem("explanationData");
-
-if(!dataStr){
-  document.getElementById("title").textContent = "解説";
-  document.getElementById("explanation").textContent =
-    "解説データがありません。\n\n問題ページから「解説を見る」を押してください。";
-}else{
-  const data = JSON.parse(dataStr);
-  const labelText = data.label ? " " + data.label : "";
-  document.getElementById("title").textContent =
-    data.year + "年度" + labelText + " の解説";
-  document.getElementById("explanation").textContent = data.explanation;
+/*
+  index.html から localStorage に保存されている explanationData を読む
+  explanationData = { year, label, explanation, isLast }
+*/
+const raw = localStorage.getItem("explanationData");
+if(!raw){
+  alert("解説データがありません。トップから問題を開き直してください。");
+  location.href = "index.html";
 }
 
-/* 問題に戻る */
-document.getElementById("backBtn").onclick = () => {
-  localStorage.removeItem("goNext");
-  history.back();
-};
+let data = {};
+try{
+  data = JSON.parse(raw);
+}catch(e){
+  alert("解説データの読み込みに失敗しました。");
+  location.href = "index.html";
+}
 
-/* 次の問題へ */
-document.getElementById("nextBtn").onclick = () => {
-  localStorage.setItem("goNext", "1");
+// タイトル（年度＋級）
+const labelText = (data.label && String(data.label).trim() !== "") ? " " + data.label : "";
+document.getElementById("titleArea").textContent = (data.year || "") + "年度" + labelText + " 解説";
+
+// 解説本文
+document.getElementById("explainArea").textContent = data.explanation || "（解説は未入力です）";
+
+// ボタン：問題に戻る（薄緑）
+document.getElementById("backBtn").onclick = () => {
+  // 戻るだけ（次の問題に進まない）
   location.href = "index.html";
 };
+
+// ボタン：次の問題 or トップへ戻る（青）
+const nextBtn = document.getElementById("nextBtn");
+const isLast = !!data.isLast;
+
+if(isLast){
+  nextBtn.textContent = "トップへ戻る";
+  nextBtn.onclick = () => {
+    // 次に進まずトップへ
+    localStorage.removeItem("goNext");
+    localStorage.setItem("goTop", "1"); // （保険）index側で見るなら使える
+    location.href = "index.html";
+  };
+}else{
+  nextBtn.textContent = "次の問題";
+  nextBtn.onclick = () => {
+    // index.html に「次へ」を指示
+    localStorage.setItem("goNext", "1");
+    location.href = "index.html";
+  };
+}
 </script>
 
 </body>
