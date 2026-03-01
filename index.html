@@ -13,18 +13,26 @@ body {
   font-size: 16px;
 }
 
+/* 年度表示 */
 #titleArea {
   font-size: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
+/* ★ 問題文だけスクロール ★ */
 #questionArea {
   font-size: 17px;
   line-height: 1.7;
-  margin-bottom: 15px;
   white-space: pre-wrap;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 15px;
+
+  max-height: 40vh;   /* 画面の40%まで */
+  overflow-y: auto;   /* 縦スクロール */
 }
 
+/* ボタン共通 */
 button {
   display: block;
   width: 100%;
@@ -41,6 +49,11 @@ button.secondary {
   background-color: #6c757d;
 }
 
+button:active {
+  opacity: 0.8;
+}
+
+/* プルダウン */
 select {
   width: 100%;
   padding: 8px;
@@ -48,10 +61,20 @@ select {
   margin: 5px 0;
 }
 
-.correct { color: green; font-weight: bold; }
-.wrong { color: red; font-weight: bold; }
+/* 正誤表示 */
+.correct {
+  color: green;
+  font-weight: bold;
+}
 
-.hidden { display: none; }
+.wrong {
+  color: red;
+  font-weight: bold;
+}
+
+.hidden {
+  display: none;
+}
 </style>
 </head>
 <body>
@@ -64,13 +87,21 @@ select {
 
 <!-- 問題画面 -->
 <div id="quizScreen" class="hidden">
+
+  <!-- 年度 -->
   <div id="titleArea"></div>
+
+  <!-- ★ スクロールする問題文 -->
   <div id="questionArea"></div>
+
+  <!-- 解答欄 -->
   <div id="answersArea"></div>
 
+  <!-- 解答 → 解説 -->
   <button id="answerBtn">解答</button>
   <button id="explainBtn" class="secondary hidden">解説</button>
 
+  <!-- 解説表示 -->
   <div id="explanationArea" class="hidden"></div>
 
   <button onclick="nextQuestion()">次の問題</button>
@@ -125,10 +156,10 @@ function showQuestion() {
 
   const answersDiv = document.getElementById("answersArea");
   const explanationDiv = document.getElementById("explanationArea");
-  answersDiv.innerHTML = "";
-  explanationDiv.classList.add("hidden");
-  explanationDiv.textContent = "";
 
+  answersDiv.innerHTML = "";
+  explanationDiv.textContent = "";
+  explanationDiv.classList.add("hidden");
   document.getElementById("explainBtn").classList.add("hidden");
 
   selectedAnswers = new Array(q.answers.length).fill(null);
