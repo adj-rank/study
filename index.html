@@ -20,7 +20,7 @@ body{
   margin-bottom:8px;
 }
 
-/* 問題文だけスクロール（\n / \n\n 両対応） */
+/* 問題文だけスクロール */
 #questionArea{
   font-size:16px;
   line-height:1.7;
@@ -62,7 +62,7 @@ select{
   line-height:1.6;
 }
 
-/* ボタン共通 */
+/* ボタン共通（青） */
 button{
   width:100%;
   margin:8px 0;
@@ -70,27 +70,19 @@ button{
   font-size:16px;
   border-radius:8px;
   border:none;
+  background:#007bff;   /* ← 基本は青 */
   color:#fff;
-}
-
-/* 解答ボタン（青） */
-#answerBtn{
-  background:#007bff;
-}
-
-/* ★ 解説ボタン（薄い緑） */
-#explainBtn{
-  background:#8fd19e;   /* 薄い緑 */
-  color:#000;           /* 黒文字で読みやすく */
-}
-
-/* 次・トップボタン */
-button.default{
-  background:#6c757d;
 }
 
 button:active{ opacity:0.85; }
 
+/* ★ 解説ボタンだけ薄い緑 */
+#explainBtn{
+  background:#8fd19e;
+  color:#000;
+}
+
+/* 正誤 */
 .correct{ color:green; font-weight:bold; }
 .wrong{ color:red; font-weight:bold; }
 
@@ -112,11 +104,15 @@ button:active{ opacity:0.85; }
 
   <div id="answersArea"></div>
 
+  <!-- 青 -->
   <button id="answerBtn">解答</button>
+
+  <!-- 薄い緑 -->
   <button id="explainBtn" class="hidden">解説を見る</button>
 
-  <button class="default" onclick="nextQuestion()">次の問題</button>
-  <button class="default" onclick="goTop()">トップへ戻る</button>
+  <!-- 青 -->
+  <button onclick="nextQuestion()">次の問題</button>
+  <button onclick="goTop()">トップへ戻る</button>
 </div>
 
 <script>
@@ -133,12 +129,9 @@ fetch("questions.json")
   .then(data => {
     questions = data;
     loadCategories();
-  })
-  .catch(err => {
-    alert("questions.json の読み込みに失敗しました。");
   });
 
-/* カテゴリ表示 */
+/* カテゴリ表示（青） */
 function loadCategories(){
   const area = document.getElementById("categoryArea");
   area.innerHTML = "";
@@ -147,7 +140,6 @@ function loadCategories(){
   categories.forEach(cat => {
     const btn = document.createElement("button");
     btn.textContent = cat;
-    btn.className = "default";
     btn.onclick = () => startQuiz(cat);
     area.appendChild(btn);
   });
