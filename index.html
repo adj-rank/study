@@ -15,10 +15,11 @@ body {
 
 h1 {
   font-size: 20px;
+  text-align: center;
 }
 
 #questionArea {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.7;
   margin-bottom: 15px;
   white-space: pre-wrap;
@@ -57,8 +58,8 @@ select {
   font-weight: bold;
 }
 
-#categoryArea {
-  margin-top: 30px;
+.hidden {
+  display: none;
 }
 
 </style>
@@ -67,16 +68,21 @@ select {
 
 <h1>試験対策アプリ</h1>
 
-<hr>
+<!-- トップ画面（カテゴリ選択） -->
+<div id="topScreen">
+  <h3>カテゴリを選択してください</h3>
+  <div id="categoryArea"></div>
+</div>
 
-<div id="questionArea"></div>
-<div id="answersArea"></div>
-<div id="explanationArea"></div>
-<br>
-<button onclick="nextQuestion()">次の問題</button>
-
-<!-- 👇 一番下に移動 -->
-<div id="categoryArea"></div>
+<!-- 問題画面 -->
+<div id="quizScreen" class="hidden">
+  <div id="questionArea"></div>
+  <div id="answersArea"></div>
+  <div id="explanationArea"></div>
+  <br>
+  <button onclick="nextQuestion()">次の問題</button>
+  <button onclick="goTop()">トップへ戻る</button>
+</div>
 
 <script>
 
@@ -99,14 +105,24 @@ function loadCategories() {
   categories.forEach(cat => {
     const btn = document.createElement("button");
     btn.textContent = cat;
-    btn.onclick = () => {
-      filteredQuestions = questions.filter(q => q.category === cat);
-      currentIndex = 0;
-      showQuestion();
-      window.scrollTo(0,0); // 上にスクロール
-    };
+    btn.onclick = () => startQuiz(cat);
     categoryArea.appendChild(btn);
   });
+}
+
+function startQuiz(category) {
+  filteredQuestions = questions.filter(q => q.category === category);
+  currentIndex = 0;
+
+  document.getElementById("topScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
+
+  showQuestion();
+}
+
+function goTop() {
+  document.getElementById("quizScreen").classList.add("hidden");
+  document.getElementById("topScreen").classList.remove("hidden");
 }
 
 function showQuestion() {
@@ -180,13 +196,11 @@ function showQuestion() {
 }
 
 function nextQuestion() {
-  if (filteredQuestions.length === 0) return;
   currentIndex++;
   if (currentIndex >= filteredQuestions.length) {
     currentIndex = 0;
   }
   showQuestion();
-  window.scrollTo(0,0);
 }
 
 </script>
