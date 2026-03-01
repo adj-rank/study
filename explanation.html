@@ -1,120 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>解説</title>
 
 <style>
 body{
   font-family:sans-serif;
-  padding:15px;
   margin:0;
+  padding:15px;
   font-size:16px;
 }
 
-/* タイトル（年度＋級） */
-#titleArea{
+#title{
   font-size:16px;
   margin-bottom:10px;
 }
 
-/* 解説本文：ボタンより上だけスクロール */
-#explainArea{
-  font-size:16px;
+#explanationArea{
+  white-space:pre-wrap;
   line-height:1.7;
-  white-space:pre-wrap;  /* 実改行(\n)を反映 */
   border:1px solid #ccc;
   padding:10px;
-  max-height:70vh;
+  max-height:65vh;
   overflow-y:auto;
-  margin-bottom:12px;
 }
 
-/* ボタン共通（基本は青） */
 button{
   width:100%;
-  margin:8px 0;
+  margin-top:10px;
   padding:12px;
   font-size:16px;
-  border-radius:8px;
   border:none;
-  background:#007bff; /* 青 */
-  color:#fff;
+  border-radius:8px;
 }
-button:active{ opacity:0.85; }
 
-/* 薄い緑（問題に戻るだけ） */
 #backBtn{
   background:#8fd19e;
   color:#000;
 }
 
-.hidden{ display:none; }
+#nextBtn{
+  background:#007bff;
+  color:#fff;
+}
 </style>
 </head>
 
 <body>
 
-<div id="titleArea"></div>
-<div id="explainArea"></div>
+<div id="title"></div>
+<div id="explanationArea"></div>
 
-<!-- 問題に戻る（薄い緑） -->
 <button id="backBtn">問題に戻る</button>
-
-<!-- 通常：次の問題（青）／最後：トップへ戻る（青） -->
 <button id="nextBtn">次の問題</button>
 
 <script>
-function normalizeNewlines(s){
-  return String(s ?? "")
-    .replace(/\\\\n/g, "\n")  // \\n → \n
-    .replace(/\\n/g, "\n");   // \n(文字列) → \n
-}
+const data = JSON.parse(localStorage.getItem("explanationData") || "{}");
 
-const raw = localStorage.getItem("explanationData");
-if(!raw){
-  alert("解説データがありません。トップから問題を開き直してください。");
-  location.href = "index.html";
-}
+document.getElementById("title").textContent =
+  data.year + "年度" + (data.label ? " " + data.label : "");
 
-let data = {};
-try{
-  data = JSON.parse(raw);
-}catch(e){
-  alert("解説データの読み込みに失敗しました。");
-  location.href = "index.html";
-}
+document.getElementById("explanationArea").textContent =
+  (data.explanation || "").replace(/\\n/g, "\n");
 
-const labelText = (data.label && String(data.label).trim() !== "") ? " " + data.label : "";
-document.getElementById("titleArea").textContent = (data.year || "") + "年度" + labelText + " 解説";
-
-// ★ ここが重要：\\n を実改行に直して textContent へ
-document.getElementById("explainArea").textContent =
-  normalizeNewlines(data.explanation) || "（解説は未入力です）";
-
-// 問題に戻る（薄緑）
+/* 問題に戻る（★ここが重要） */
 document.getElementById("backBtn").onclick = () => {
+  // 何もフラグを立てない
   location.href = "index.html";
 };
 
-const nextBtn = document.getElementById("nextBtn");
-const isLast = !!data.isLast;
-
-if(isLast){
-  nextBtn.textContent = "トップへ戻る";
-  nextBtn.onclick = () => {
-    localStorage.removeItem("goNext");
-    localStorage.setItem("goTop", "1");
-    location.href = "index.html";
-  };
-}else{
-  nextBtn.textContent = "次の問題";
-  nextBtn.onclick = () => {
-    localStorage.setItem("goNext", "1");
-    location.href = "index.html";
-  };
-}
+/* 次の問題へ */
+document.getElementById("nextBtn").onclick = () => {
+  localStorage.setItem("goNext", "1");
+  location.href = "index.html";
+};
 </script>
 
 </body>
