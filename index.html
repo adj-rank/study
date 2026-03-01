@@ -19,20 +19,39 @@ body {
   margin-bottom: 8px;
 }
 
-/* ★ 問題文だけスクロール ★ */
+/* 問題文スクロール */
 #questionArea {
-  font-size: 17px;
+  font-size: 14px;
   line-height: 1.7;
   white-space: pre-wrap;
   border: 1px solid #ccc;
   padding: 10px;
   margin-bottom: 15px;
-
-  max-height: 40vh;   /* 画面の40%まで */
-  overflow-y: auto;   /* 縦スクロール */
+  max-height: 40vh;
+  overflow-y: auto;
 }
 
-/* ボタン共通 */
+/* 空欄行（横並び） */
+.answer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.answer-row label {
+  min-width: 60px;
+  font-size: 14px;
+}
+
+/* プルダウン */
+select {
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+}
+
+/* ボタン */
 button {
   display: block;
   width: 100%;
@@ -53,15 +72,7 @@ button:active {
   opacity: 0.8;
 }
 
-/* プルダウン */
-select {
-  width: 100%;
-  padding: 8px;
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-/* 正誤表示 */
+/* 正誤 */
 .correct {
   color: green;
   font-weight: bold;
@@ -88,20 +99,15 @@ select {
 <!-- 問題画面 -->
 <div id="quizScreen" class="hidden">
 
-  <!-- 年度 -->
   <div id="titleArea"></div>
 
-  <!-- ★ スクロールする問題文 -->
   <div id="questionArea"></div>
 
-  <!-- 解答欄 -->
   <div id="answersArea"></div>
 
-  <!-- 解答 → 解説 -->
   <button id="answerBtn">解答</button>
   <button id="explainBtn" class="secondary hidden">解説</button>
 
-  <!-- 解説表示 -->
   <div id="explanationArea" class="hidden"></div>
 
   <button onclick="nextQuestion()">次の問題</button>
@@ -167,8 +173,9 @@ function showQuestion() {
 
   q.answers.forEach((_, index) => {
     const row = document.createElement("div");
+    row.className = "answer-row";
 
-    const label = document.createElement("div");
+    const label = document.createElement("label");
     label.textContent = "空欄" + (index + 1);
     row.appendChild(label);
 
@@ -181,7 +188,7 @@ function showQuestion() {
     };
     row.appendChild(select);
 
-    const resultSpan = document.createElement("div");
+    const resultSpan = document.createElement("span");
     row.appendChild(resultSpan);
     resultSpans.push(resultSpan);
 
@@ -195,10 +202,10 @@ function showQuestion() {
 function checkAnswer(q) {
   q.answers.forEach((correct, i) => {
     if (selectedAnswers[i] === correct) {
-      resultSpans[i].textContent = "⭕ 正解";
+      resultSpans[i].textContent = " ⭕";
       resultSpans[i].className = "correct";
     } else {
-      resultSpans[i].textContent = "❌ 正解: " + q.choices[correct];
+      resultSpans[i].textContent = " ❌ 正解: " + q.choices[correct];
       resultSpans[i].className = "wrong";
     }
   });
