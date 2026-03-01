@@ -6,27 +6,29 @@
 <title>技術アジャスター試験問題</title>
 
 <style>
+/* 全体 */
 body{
-  font-family:sans-serif;
+  font-family: sans-serif;
   padding:15px;
   margin:0;
   font-size:16px;
 }
 
+/* 年度表示（カテゴリ名は表示しない） */
 #titleArea{
   font-size:16px;
   margin-bottom:8px;
 }
 
-/* ★ 問題文だけスクロール ＋ \n と \n\n を表示可能 */
+/* ★ 問題文だけスクロール（\n と \n\n 両対応） */
 #questionArea{
   font-size:16px;
   line-height:1.7;
-  white-space:pre-wrap; /* ← \n も \n\n もそのまま反映 */
+  white-space:pre-wrap;  /* \n と \n\n をそのまま表示 */
   border:1px solid #ccc;
   padding:10px;
   margin-bottom:15px;
-  max-height:50vh;
+  max-height:40vh;
   overflow-y:auto;
 }
 
@@ -35,7 +37,7 @@ body{
   margin-bottom:12px;
 }
 
-/* 空欄ラベル＋選択を同じ行 */
+/* 空欄ラベル＋選択は同じ行 */
 .answer-row{
   display:flex;
   align-items:center;
@@ -44,22 +46,24 @@ body{
 
 .answer-row label{
   min-width:60px;
-  font-size:14px;
+  font-size:16px;
 }
 
 /* 選択肢 */
 select{
   flex:1;
-  padding:8px;
-  font-size:14px;
+  padding:10px;
+  font-size:16px;
 }
 
 /* 正解表示は下 */
 .answer-result{
   margin-left:60px;
-  font-size:14px;
+  font-size:16px;
+  line-height:1.6;
 }
 
+/* ボタン */
 button{
   width:100%;
   margin:8px 0;
@@ -85,7 +89,7 @@ button:active{ opacity:0.85; }
 </head>
 <body>
 
-<!-- トップ画面（カテゴリだけ） -->
+<!-- トップ画面（カテゴリだけ表示） -->
 <div id="topScreen">
   <h3>技術アジャスター試験問題</h3>
   <div id="categoryArea"></div>
@@ -95,6 +99,7 @@ button:active{ opacity:0.85; }
 <div id="quizScreen" class="hidden">
   <div id="titleArea"></div>
   <div id="questionArea"></div>
+
   <div id="answersArea"></div>
 
   <button id="answerBtn">解答</button>
@@ -112,6 +117,7 @@ let currentIndex = 0;
 let selectedAnswers = [];
 let resultDivs = [];
 
+/* questions.json を読み込み */
 fetch("questions.json")
   .then(res => res.json())
   .then(data => {
@@ -120,8 +126,10 @@ fetch("questions.json")
   })
   .catch(err => {
     console.error("questions.json の読み込みに失敗:", err);
+    alert("questions.json の読み込みに失敗しました。JSONの赤文字（構文エラー）を確認してください。");
   });
 
+/* トップ画面：カテゴリ一覧 */
 function loadCategories(){
   const area = document.getElementById("categoryArea");
   area.innerHTML = "";
@@ -136,6 +144,7 @@ function loadCategories(){
   });
 }
 
+/* カテゴリを選んで開始 */
 function startQuiz(category){
   filteredQuestions = questions.filter(q => q.category === category);
   currentIndex = 0;
@@ -146,16 +155,18 @@ function startQuiz(category){
   showQuestion();
 }
 
+/* トップへ戻る */
 function goTop(){
   document.getElementById("quizScreen").classList.add("hidden");
   document.getElementById("topScreen").classList.remove("hidden");
 }
 
+/* 問題表示 */
 function showQuestion(){
   const q = filteredQuestions[currentIndex];
   if(!q) return;
 
-  // 年度だけ表示（カテゴリ名は出さない）
+  // 年度だけ表示（カテゴリ名は表示しない）
   document.getElementById("titleArea").textContent = q.year + "年度";
 
   // \n と \n\n を反映
@@ -184,12 +195,13 @@ function showQuestion(){
     select.innerHTML =
       "<option value=''>選択してください</option>" +
       q.choices.map((c, idx) => `<option value="${idx}">${c}</option>`).join("");
+
     select.onchange = () => {
       const v = select.value;
       selectedAnswers[i] = (v === "") ? null : parseInt(v, 10);
     };
-    row.appendChild(select);
 
+    row.appendChild(select);
     block.appendChild(row);
 
     const result = document.createElement("div");
@@ -204,6 +216,7 @@ function showQuestion(){
   document.getElementById("explainBtn").onclick = () => goExplanation(q);
 }
 
+/* 解答チェック（正解は下に表示） */
 function checkAnswer(q){
   q.answers.forEach((correct, i) => {
     if(selectedAnswers[i] === correct){
@@ -215,9 +228,11 @@ function checkAnswer(q){
     }
   });
 
+  // 解説ボタン表示
   document.getElementById("explainBtn").classList.remove("hidden");
 }
 
+/* 解説ページへ（localStorageで受け渡し） */
 function goExplanation(q){
   localStorage.setItem("explanationData", JSON.stringify({
     year: q.year,
@@ -226,6 +241,7 @@ function goExplanation(q){
   location.href = "explanation.html";
 }
 
+/* 次の問題 */
 function nextQuestion(){
   currentIndex++;
   if(currentIndex >= filteredQuestions.length) currentIndex = 0;
