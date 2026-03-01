@@ -14,9 +14,7 @@
 "choices": ["FRP","ポリプロピレン","鋳鉄","アルミ合金","銅"],
 "answer": 1,
 "explanation": "正解はポリプロピレン。"
-}
-]
-,
+},
 {
 "category": "トラック",
 "type": "truefalse",
@@ -24,3 +22,4 @@
 "answer": false,
 "explanation": "大型免許が必要。"
 }
+]
