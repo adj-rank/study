@@ -42,53 +42,14 @@ img { max-width: 100%; margin: 10px 0; }
 </div>
 
 <script>
-let questions = [
+let questions = [];
 
-{ category: "自動車材料", type: "truefalse",
-question: "鋼板は車体材料として多く使用されている。",
-answer: true,
-explanation: "正解。車体の多くは鋼板で構成されている。" },
-
-{ category: "樹脂", type: "multiple",
-question: "バンパーに多く使用される材料はどれか。",
-choices: ["FRP","ポリプロピレン","鋳鉄","アルミ合金","銅"],
-answer: 1,
-explanation: "正解はポリプロピレン。軽量で衝撃吸収性に優れる。" },
-
-{ category: "アライメント", type: "truefalse",
-question: "トー角はタイヤの内外向きを示す角度である。",
-answer: true,
-explanation: "正解。トーイン・トーアウトで表す。" },
-
-{ category: "運動特性", type: "multiple",
-question: "アンダーステアの状態とはどれか。",
-choices: ["前輪が外側に滑る","後輪が外側に滑る","全輪ロック","直進不能","ハンドルが重い"],
-answer: 0,
-explanation: "正解は前輪が外側に滑る状態。" },
-
-{ category: "損傷特性", type: "truefalse",
-question: "高張力鋼板は通常鋼板より伸びにくい。",
-answer: true,
-explanation: "正解。強度が高く加工特性が異なる。" },
-
-{ category: "修理技法", type: "multiple",
-question: "スタッド溶接機の主な用途はどれか。",
-choices: ["塗装","引き出し作業","研磨","防錆","溶断"],
-answer: 1,
-explanation: "正解は引き出し作業。" },
-
-{ category: "塗装関係", type: "truefalse",
-question: "メタリック塗装はアルミ粉を含む塗料である。",
-answer: true,
-explanation: "正解。光の反射で金属感を出す。" },
-
-{ category: "トラック", type: "multiple",
-question: "大型トラックの後輪軸数が多い理由はどれか。",
-choices: ["速度向上","積載荷重分散","燃費改善","旋回性能向上","騒音対策"],
-answer: 1,
-explanation: "正解は積載荷重分散。" }
-
-];
+fetch("questions.json")
+  .then(response => response.json())
+  .then(data => {
+    questions = data;
+    loadCategories();
+  });
 
 let currentCategory = "";
 let filteredQuestions = [];
@@ -180,7 +141,6 @@ nextBtn.onclick = () => {
   }
 };
 
-loadCategories();
 </script>
 
 </body>
