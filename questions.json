@@ -1,0 +1,18 @@
+[
+{
+"category": "自動車材料",
+"type": "truefalse",
+"question": "鋼板は車体材料として多く使用されている。",
+"answer": true,
+"explanation": "正解。車体の多くは鋼板で構成されている。"
+},
+
+{
+"category": "樹脂",
+"type": "multiple",
+"question": "バンパーに多く使用される材料はどれか。",
+"choices": ["FRP","ポリプロピレン","鋳鉄","アルミ合金","銅"],
+"answer": 1,
+"explanation": "正解はポリプロピレン。"
+}
+]
