@@ -13,11 +13,13 @@ body{
   margin:0;
 }
 
+/* タイトル */
 #title{
   font-size:16px;
   margin-bottom:10px;
 }
 
+/* 解説本文エリア */
 #explanationArea{
   white-space:pre-wrap;
   line-height:1.7;
@@ -28,6 +30,14 @@ body{
   margin-bottom:15px;
 }
 
+/* 自動幅の区切り線（スマホ対応） */
+.hr{
+  border:none;
+  border-top:1px solid #666;
+  margin:16px 0;
+}
+
+/* ボタン共通 */
 button{
   width:100%;
   margin:8px 0;
@@ -37,18 +47,21 @@ button{
   border:none;
 }
 
+/* 問題に戻る（薄い緑） */
 #backBtn{
-  background:#8fd19e;   /* 薄い緑 */
+  background:#8fd19e;
   color:#000;
 }
 
+/* 次の問題（青） */
 #nextBtn{
-  background:#007bff;   /* 青 */
+  background:#007bff;
   color:#fff;
 }
 
+/* トップへ戻る（青） */
 #topBtn{
-  background:#007bff;   /* 青 */
+  background:#007bff;
   color:#fff;
 }
 
@@ -72,42 +85,37 @@ button{
 <button id="topBtn" class="hidden">トップへ戻る</button>
 
 <script>
+/* JSONの \\n と 区切り線を変換 */
 function normalizeText(str){
   if(!str) return "";
-  return str.replace(/\\n/g, "\n");
+
+  return str
+    .replace(/\\n/g, "\n")                     // 改行復元
+    .replace(/\[\[SEPARATOR\]\]/g, "\n<hr class='hr'>\n");
 }
 
 /* 解説データ取得 */
-const explanationData =
+const data =
   JSON.parse(localStorage.getItem("explanationData") || "{}");
 
-/* 現在位置 */
-const currentIndex =
-  parseInt(localStorage.getItem("currentIndex") || "0", 10);
-
-/* 問題一覧（index.htmlで保持している想定） */
-const questions =
-  JSON.parse(localStorage.getItem("questionsCache") || "[]");
-
-/* タイトル */
+/* タイトル表示 */
 document.getElementById("title").textContent =
-  (explanationData.year || "") + "年度 " + (explanationData.label || "");
+  (data.year || "") + "年度 " + (data.label || "");
 
-/* 解説本文 */
-document.getElementById("explanationArea").textContent =
-  normalizeText(explanationData.explanation);
+/* 解説本文表示 */
+document.getElementById("explanationArea").innerHTML =
+  normalizeText(data.explanation);
 
-/* 最後の問題か判定 */
-const isLast = questions.length > 0 && currentIndex === questions.length - 1;
+/* 最後の問題かどうか（index.html から渡す） */
+const isLast = data.isLast === true;
 
 /* ボタン制御 */
 if(isLast){
-  // 最後 → トップへ戻るだけ
+  // 最後 → トップへ戻るのみ
   document.getElementById("backBtn").classList.add("hidden");
   document.getElementById("nextBtn").classList.add("hidden");
   document.getElementById("topBtn").classList.remove("hidden");
 }else{
-  // 通常
   document.getElementById("topBtn").classList.add("hidden");
 }
 
