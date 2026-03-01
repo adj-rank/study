@@ -11,6 +11,7 @@ body{
   font-size:16px;
   padding:15px;
   margin:0;
+  overflow-x:hidden;              /* ★ ページ全体の横スクロール禁止 */
 }
 
 /* タイトル */
@@ -27,14 +28,19 @@ body{
   padding:10px;
   max-height:70vh;
   overflow-y:auto;
+  overflow-x:hidden;              /* ★ 横方向は必ず隠す */
   margin-bottom:15px;
+  box-sizing:border-box;          /* ★ padding込みで幅計算 */
 }
 
-/* 自動幅の区切り線（スマホ対応） */
+/* 区切り線（完全スマホ対応） */
 .hr{
+  width:100%;                     /* ★ 親幅に合わせる */
+  max-width:100%;
   border:none;
   border-top:1px solid #666;
   margin:16px 0;
+  box-sizing:border-box;          /* ★ はみ出し防止 */
 }
 
 /* ボタン共通 */
@@ -77,61 +83,46 @@ button{
 
 <div id="explanationArea"></div>
 
-<!-- 通常時 -->
 <button id="backBtn">問題に戻る</button>
 <button id="nextBtn">次の問題</button>
-
-<!-- 最後の問題用 -->
 <button id="topBtn" class="hidden">トップへ戻る</button>
 
 <script>
-/* JSONの \\n と 区切り線を変換 */
 function normalizeText(str){
   if(!str) return "";
 
   return str
-    .replace(/\\n/g, "\n")                     // 改行復元
+    .replace(/\\n/g, "\n")
     .replace(/\[\[SEPARATOR\]\]/g, "\n<hr class='hr'>\n");
 }
 
-/* 解説データ取得 */
 const data =
   JSON.parse(localStorage.getItem("explanationData") || "{}");
 
-/* タイトル表示 */
 document.getElementById("title").textContent =
   (data.year || "") + "年度 " + (data.label || "");
 
-/* 解説本文表示 */
 document.getElementById("explanationArea").innerHTML =
   normalizeText(data.explanation);
 
-/* 最後の問題かどうか（index.html から渡す） */
 const isLast = data.isLast === true;
 
-/* ボタン制御 */
 if(isLast){
-  // 最後 → トップへ戻るのみ
   document.getElementById("backBtn").classList.add("hidden");
   document.getElementById("nextBtn").classList.add("hidden");
   document.getElementById("topBtn").classList.remove("hidden");
-}else{
-  document.getElementById("topBtn").classList.add("hidden");
 }
 
-/* 問題に戻る（同じ問題） */
 document.getElementById("backBtn").onclick = () => {
   localStorage.setItem("returnMode", "back");
   location.href = "index.html";
 };
 
-/* 次の問題 */
 document.getElementById("nextBtn").onclick = () => {
   localStorage.setItem("returnMode", "next");
   location.href = "index.html";
 };
 
-/* トップへ戻る */
 document.getElementById("topBtn").onclick = () => {
   localStorage.removeItem("returnMode");
   location.href = "index.html";
