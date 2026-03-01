@@ -22,7 +22,7 @@ body {
   font-size: 17px;
   line-height: 1.7;
   margin-bottom: 15px;
-  white-space: pre-wrap; /* questions.json の \n を反映 */
+  white-space: pre-wrap;
 }
 
 button {
@@ -37,8 +37,8 @@ button {
   color: white;
 }
 
-button:active {
-  opacity: 0.8;
+button.secondary {
+  background-color: #6c757d;
 }
 
 select {
@@ -48,19 +48,10 @@ select {
   margin: 5px 0;
 }
 
-.correct {
-  color: green;
-  font-weight: bold;
-}
+.correct { color: green; font-weight: bold; }
+.wrong { color: red; font-weight: bold; }
 
-.wrong {
-  color: red;
-  font-weight: bold;
-}
-
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -76,7 +67,11 @@ select {
   <div id="titleArea"></div>
   <div id="questionArea"></div>
   <div id="answersArea"></div>
-  <div id="explanationArea"></div>
+
+  <button id="answerBtn">解答</button>
+  <button id="explainBtn" class="secondary hidden">解説</button>
+
+  <div id="explanationArea" class="hidden"></div>
 
   <button onclick="nextQuestion()">次の問題</button>
   <button onclick="goTop()">トップへ戻る</button>
@@ -86,6 +81,8 @@ select {
 let questions = [];
 let filteredQuestions = [];
 let currentIndex = 0;
+let selectedAnswers = [];
+let resultSpans = [];
 
 fetch("questions.json")
   .then(res => res.json())
@@ -97,7 +94,6 @@ fetch("questions.json")
 function loadCategories() {
   const area = document.getElementById("categoryArea");
   area.innerHTML = "";
-
   const categories = [...new Set(questions.map(q => q.category))];
 
   categories.forEach(cat => {
@@ -111,10 +107,8 @@ function loadCategories() {
 function startQuiz(category) {
   filteredQuestions = questions.filter(q => q.category === category);
   currentIndex = 0;
-
   document.getElementById("topScreen").classList.add("hidden");
   document.getElementById("quizScreen").classList.remove("hidden");
-
   showQuestion();
 }
 
@@ -126,18 +120,21 @@ function goTop() {
 function showQuestion() {
   const q = filteredQuestions[currentIndex];
 
-  /* 年度のみ表示（例：2025年度） */
-  document.getElementById("titleArea").textContent =
-    q.year + "年度";
-
+  document.getElementById("titleArea").textContent = q.year + "年度";
   document.getElementById("questionArea").textContent = q.question;
-  document.getElementById("answersArea").innerHTML = "";
-  document.getElementById("explanationArea").innerHTML = "";
 
-  let selectedAnswers = new Array(q.answers.length).fill(null);
-  let resultSpans = [];
+  const answersDiv = document.getElementById("answersArea");
+  const explanationDiv = document.getElementById("explanationArea");
+  answersDiv.innerHTML = "";
+  explanationDiv.classList.add("hidden");
+  explanationDiv.textContent = "";
 
-  q.answers.forEach((correctVal, index) => {
+  document.getElementById("explainBtn").classList.add("hidden");
+
+  selectedAnswers = new Array(q.answers.length).fill(null);
+  resultSpans = [];
+
+  q.answers.forEach((_, index) => {
     const row = document.createElement("div");
 
     const label = document.createElement("div");
@@ -147,47 +144,45 @@ function showQuestion() {
     const select = document.createElement("select");
     select.innerHTML =
       "<option value=''>選択してください</option>" +
-      q.choices.map((choice, i) =>
-        "<option value='" + i + "'>" + choice + "</option>"
-      ).join("");
-
-    select.onchange = function () {
-      selectedAnswers[index] = parseInt(this.value);
+      q.choices.map((c, i) => `<option value="${i}">${c}</option>`).join("");
+    select.onchange = () => {
+      selectedAnswers[index] = parseInt(select.value);
     };
-
     row.appendChild(select);
 
     const resultSpan = document.createElement("div");
     row.appendChild(resultSpan);
     resultSpans.push(resultSpan);
 
-    document.getElementById("answersArea").appendChild(row);
+    answersDiv.appendChild(row);
   });
 
-  const checkBtn = document.createElement("button");
-  checkBtn.textContent = "解答";
-  checkBtn.onclick = function () {
-    q.answers.forEach((correctVal, i) => {
-      if (selectedAnswers[i] === correctVal) {
-        resultSpans[i].textContent = "⭕ 正解";
-        resultSpans[i].className = "correct";
-      } else {
-        resultSpans[i].textContent =
-          "❌ 正解: " + q.choices[correctVal];
-        resultSpans[i].className = "wrong";
-      }
-    });
-    document.getElementById("explanationArea").textContent = q.explanation;
-  };
+  document.getElementById("answerBtn").onclick = () => checkAnswer(q);
+  document.getElementById("explainBtn").onclick = () => showExplanation(q);
+}
 
-  document.getElementById("answersArea").appendChild(checkBtn);
+function checkAnswer(q) {
+  q.answers.forEach((correct, i) => {
+    if (selectedAnswers[i] === correct) {
+      resultSpans[i].textContent = "⭕ 正解";
+      resultSpans[i].className = "correct";
+    } else {
+      resultSpans[i].textContent = "❌ 正解: " + q.choices[correct];
+      resultSpans[i].className = "wrong";
+    }
+  });
+  document.getElementById("explainBtn").classList.remove("hidden");
+}
+
+function showExplanation(q) {
+  const div = document.getElementById("explanationArea");
+  div.textContent = q.explanation;
+  div.classList.remove("hidden");
 }
 
 function nextQuestion() {
   currentIndex++;
-  if (currentIndex >= filteredQuestions.length) {
-    currentIndex = 0;
-  }
+  if (currentIndex >= filteredQuestions.length) currentIndex = 0;
   showQuestion();
 }
 </script>
