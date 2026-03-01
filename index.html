@@ -2,13 +2,58 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>試験対策アプリ</title>
+
 <style>
-body { font-family: sans-serif; padding: 20px; }
-button { margin: 5px; padding: 5px 10px; }
-select { margin: 5px 0; padding: 5px; }
-.correct { color: green; font-weight: bold; }
-.wrong { color: red; font-weight: bold; }
+body {
+  font-family: sans-serif;
+  padding: 15px;
+  font-size: 18px;
+  margin: 0;
+}
+
+h1 {
+  font-size: 22px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.correct {
+  color: green;
+  font-weight: bold;
+}
+
+.wrong {
+  color: red;
+  font-weight: bold;
+}
+
+#questionArea {
+  margin-bottom: 15px;
+}
+
 </style>
 </head>
 <body>
@@ -104,8 +149,8 @@ function showQuestion() {
 
       const row = document.createElement("div");
 
-      const label = document.createElement("span");
-      label.textContent = "空欄" + (index+1) + " ";
+      const label = document.createElement("div");
+      label.textContent = "空欄" + (index+1);
       row.appendChild(label);
 
       const select = document.createElement("select");
@@ -121,8 +166,7 @@ function showQuestion() {
 
       row.appendChild(select);
 
-      const resultSpan = document.createElement("span");
-      resultSpan.style.marginLeft = "10px";
+      const resultSpan = document.createElement("div");
       row.appendChild(resultSpan);
 
       resultSpans.push(resultSpan);
@@ -136,11 +180,11 @@ function showQuestion() {
 
       q.answers.forEach((correctVal, i) => {
         if (selectedAnswers[i] === correctVal) {
-          resultSpans[i].textContent = " ⭕";
+          resultSpans[i].textContent = "⭕ 正解";
           resultSpans[i].className = "correct";
         } else {
           resultSpans[i].textContent =
-            " ❌ 正解: " + q.choices[correctVal];
+            "❌ 正解: " + q.choices[correctVal];
           resultSpans[i].className = "wrong";
         }
       });
@@ -148,7 +192,6 @@ function showQuestion() {
       explanationDiv.textContent = q.explanation;
     };
 
-    answersDiv.appendChild(document.createElement("br"));
     answersDiv.appendChild(checkBtn);
   }
 }
