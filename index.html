@@ -1,304 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>技術アジャスター試験問題</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>解説</title>
 
 <style>
 body{
   font-family:sans-serif;
-  padding:15px;
   margin:0;
+  padding:15px;
   font-size:16px;
 }
 
-/* トップ画面タイトル中央 */
-#topScreen h3{
-  text-align:center;
-  margin:0 0 16px 0;
+#title{
+  font-size:16px;
+  margin-bottom:10px;
 }
 
-/* 年度＋区分 */
-#titleArea{
-  font-size:16px;
-  margin-bottom:8px;
-}
-
-/* 問題文スクロール */
-#questionArea{
-  font-size:16px;
-  line-height:1.7;
+#explanationArea{
   white-space:pre-wrap;
+  line-height:1.7;
   border:1px solid #ccc;
   padding:10px;
-  margin-bottom:15px;
-  max-height:40vh;
+  max-height:65vh;
   overflow-y:auto;
-}
-
-.answer-block{ margin-bottom:12px; }
-
-.answer-row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.answer-row label{ min-width:60px; }
-
-select{
-  flex:1;
-  padding:10px;
-  font-size:16px;
-}
-
-.answer-result{
-  margin-left:60px;
-  font-size:16px;
-  line-height:1.6;
 }
 
 button{
   width:100%;
-  margin:8px 0;
+  margin-top:10px;
   padding:12px;
   font-size:16px;
-  border-radius:8px;
   border:none;
-  background:#007bff;
-  color:#fff;
+  border-radius:8px;
 }
 
-#explainBtn{
+#backBtn{
   background:#8fd19e;
   color:#000;
 }
 
-.correct{ color:green; font-weight:bold; }
-.wrong{ color:red; font-weight:bold; }
-.hidden{ display:none; }
+#nextBtn{
+  background:#007bff;
+  color:#fff;
+}
 </style>
 </head>
 
 <body>
 
-<!-- トップ画面 -->
-<div id="topScreen">
-  <h3>技術アジャスター試験問題</h3>
-  <div id="categoryArea"></div>
-</div>
+<div id="title"></div>
+<div id="explanationArea"></div>
 
-<!-- 問題画面 -->
-<div id="quizScreen" class="hidden">
-  <div id="titleArea"></div>
-  <div id="questionArea"></div>
-  <div id="answersArea"></div>
-
-  <button id="answerBtn">解答</button>
-  <button id="explainBtn" class="hidden">解説を見る</button>
-
-  <button id="nextBtnInQuiz" onclick="nextQuestion()">次の問題</button>
-  <button id="topBtnInQuiz" class="hidden" onclick="goTop()">トップへ戻る</button>
-</div>
+<button id="backBtn">問題に戻る</button>
+<button id="nextBtn">次の問題</button>
 
 <script>
-let questions = [];
-let filteredQuestions = [];
-let currentIndex = 0;
-let selectedAnswers = [];
-let resultDivs = [];
-let currentCategory = null;
+const data = JSON.parse(localStorage.getItem("explanationData") || "{}");
 
-/* ★ スクロールを必ず一番上へ */
-function scrollToTop(){
-  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-}
+document.getElementById("title").textContent =
+  data.year + "年度" + (data.label ? " " + data.label : "");
 
-/* ★ \\n / \n を実改行に正規化 */
-function normalizeNewlines(s){
-  return String(s ?? "")
-    .replace(/\\\\n/g, "\n")
-    .replace(/\\n/g, "\n");
-}
+document.getElementById("explanationArea").textContent =
+  (data.explanation || "").replace(/\\n/g, "\n");
 
-/* questions.json 読み込み */
-fetch("questions.json?ts=" + Date.now())
-  .then(res => res.json())
-  .then(data => {
-    questions = data;
-    loadCategories();
-    resumeFromExplanationIfNeeded();
-  })
-  .catch(() => {
-    alert("questions.json の読み込みに失敗しました。");
-  });
+/* 問題に戻る（★ここが重要） */
+document.getElementById("backBtn").onclick = () => {
+  // 何もフラグを立てない
+  location.href = "index.html";
+};
 
-/* カテゴリ一覧 */
-function loadCategories(){
-  const area = document.getElementById("categoryArea");
-  area.innerHTML = "";
-
-  [...new Set(questions.map(q => q.category))].forEach(cat => {
-    const btn = document.createElement("button");
-    btn.textContent = cat;
-    btn.onclick = () => startQuiz(cat);
-    area.appendChild(btn);
-  });
-}
-
-/* クイズ開始 */
-function startQuiz(category){
-  currentCategory = category;
-  filteredQuestions = questions.filter(q => q.category === category);
-  currentIndex = 0;
-
-  document.getElementById("topScreen").classList.add("hidden");
-  document.getElementById("quizScreen").classList.remove("hidden");
-
-  scrollToTop();
-  showQuestion();
-}
-
-/* トップへ戻る */
-function goTop(){
-  document.getElementById("quizScreen").classList.add("hidden");
-  document.getElementById("topScreen").classList.remove("hidden");
-  scrollToTop();   // ★ ここが重要
-}
-
-/* 問題表示 */
-function showQuestion(){
-  const q = filteredQuestions[currentIndex];
-  if(!q) return;
-
-  const labelText = q.label ? " " + q.label : "";
-  document.getElementById("titleArea").textContent =
-    q.year + "年度" + labelText;
-
-  document.getElementById("questionArea").textContent =
-    normalizeNewlines(q.question);
-
-  const answersDiv = document.getElementById("answersArea");
-  answersDiv.innerHTML = "";
-
-  document.getElementById("answerBtn").classList.remove("hidden");
-  document.getElementById("explainBtn").classList.add("hidden");
-
-  selectedAnswers = new Array(q.answers.length).fill(null);
-  resultDivs = [];
-
-  q.answers.forEach((_, i) => {
-    const block = document.createElement("div");
-    block.className = "answer-block";
-
-    const row = document.createElement("div");
-    row.className = "answer-row";
-
-    const label = document.createElement("label");
-    label.textContent = "空欄" + (i + 1);
-
-    const select = document.createElement("select");
-    select.innerHTML =
-      "<option value=''>選択してください</option>" +
-      q.choices.map((c, idx) =>
-        `<option value="${idx}">${c}</option>`
-      ).join("");
-
-    select.onchange = () => {
-      selectedAnswers[i] = select.value === "" ? null : Number(select.value);
-    };
-
-    row.appendChild(label);
-    row.appendChild(select);
-    block.appendChild(row);
-
-    const result = document.createElement("div");
-    result.className = "answer-result";
-    block.appendChild(result);
-
-    resultDivs.push(result);
-    answersDiv.appendChild(block);
-  });
-
-  document.getElementById("answerBtn").onclick = () => checkAnswer(q);
-  document.getElementById("explainBtn").onclick = () => goExplanation(q);
-
-  const isLast = currentIndex === filteredQuestions.length - 1;
-  document.getElementById("nextBtnInQuiz").classList.toggle("hidden", isLast);
-  document.getElementById("topBtnInQuiz").classList.toggle("hidden", !isLast);
-
-  scrollToTop();
-}
-
-/* 解答チェック */
-function checkAnswer(q){
-  q.answers.forEach((correct, i) => {
-    if(selectedAnswers[i] === correct){
-      resultDivs[i].textContent = "⭕ 正解";
-      resultDivs[i].className = "answer-result correct";
-    }else{
-      resultDivs[i].textContent = "❌ 正解：" + q.choices[correct];
-      resultDivs[i].className = "answer-result wrong";
-    }
-  });
-
-  document.getElementById("answerBtn").classList.add("hidden");
-  document.getElementById("explainBtn").classList.remove("hidden");
-}
-
-/* 解説ページへ */
-function goExplanation(q){
-  const isLast = currentIndex === filteredQuestions.length - 1;
-
-  localStorage.setItem("currentCategory", currentCategory);
-  localStorage.setItem("currentIndex", String(currentIndex));
-
-  localStorage.setItem("explanationData", JSON.stringify({
-    year: q.year,
-    label: q.label || "",
-    explanation: q.explanation || "",
-    isLast: isLast
-  }));
-
-  location.href = "explanation.html";
-}
-
-/* 次の問題 */
-function nextQuestion(){
-  currentIndex++;
-  if(currentIndex >= filteredQuestions.length){
-    goTop();
-    return;
-  }
-  showQuestion();
-}
-
-/* 解説ページから戻った場合 */
-function resumeFromExplanationIfNeeded(){
-  if(localStorage.getItem("goTop") === "1"){
-    localStorage.removeItem("goTop");
-    goTop();
-    return;
-  }
-
-  if(localStorage.getItem("goNext") !== "1") return;
-  localStorage.removeItem("goNext");
-
-  currentCategory = localStorage.getItem("currentCategory");
-  currentIndex = Number(localStorage.getItem("currentIndex")) + 1;
-
-  filteredQuestions = questions.filter(q => q.category === currentCategory);
-
-  if(currentIndex >= filteredQuestions.length){
-    goTop();
-    return;
-  }
-
-  document.getElementById("topScreen").classList.add("hidden");
-  document.getElementById("quizScreen").classList.remove("hidden");
-
-  showQuestion();
-}
+/* 次の問題へ */
+document.getElementById("nextBtn").onclick = () => {
+  localStorage.setItem("goNext", "1");
+  location.href = "index.html";
+};
 </script>
 
 </body>
