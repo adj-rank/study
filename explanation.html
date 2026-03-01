@@ -7,10 +7,10 @@
 
 <style>
 body{
-  font-family:sans-serif;
-  margin:0;
-  padding:15px;
+  font-family:"MS Mincho", serif;
   font-size:16px;
+  padding:15px;
+  margin:0;
 }
 
 #title{
@@ -23,17 +23,17 @@ body{
   line-height:1.7;
   border:1px solid #ccc;
   padding:10px;
-  max-height:65vh;
+  max-height:70vh;
   overflow-y:auto;
 }
 
 button{
   width:100%;
-  margin-top:10px;
+  margin:8px 0;
   padding:12px;
   font-size:16px;
-  border:none;
   border-radius:8px;
+  border:none;
 }
 
 #backBtn{
@@ -45,6 +45,11 @@ button{
   background:#007bff;
   color:#fff;
 }
+
+#topBtn{
+  background:#8fd19e;
+  color:#000;
+}
 </style>
 </head>
 
@@ -55,25 +60,31 @@ button{
 
 <button id="backBtn">問題に戻る</button>
 <button id="nextBtn">次の問題</button>
+<button id="topBtn" class="hidden">トップへ戻る</button>
 
 <script>
+function normalizeText(str){
+  if(!str) return "";
+  return str.replace(/\\n/g, "\n");
+}
+
 const data = JSON.parse(localStorage.getItem("explanationData") || "{}");
 
 document.getElementById("title").textContent =
-  data.year + "年度" + (data.label ? " " + data.label : "");
+  (data.year || "") + "年度 " + (data.label || "");
 
 document.getElementById("explanationArea").textContent =
-  (data.explanation || "").replace(/\\n/g, "\n");
+  normalizeText(data.explanation);
 
-/* 問題に戻る（★ここが重要） */
+const currentIndex = parseInt(localStorage.getItem("currentIndex") || "0", 10);
+const questions = JSON.parse(localStorage.getItem("questionsCache") || "[]");
+
 document.getElementById("backBtn").onclick = () => {
-  // 何もフラグを立てない
   location.href = "index.html";
 };
 
-/* 次の問題へ */
 document.getElementById("nextBtn").onclick = () => {
-  localStorage.setItem("goNext", "1");
+  localStorage.setItem("currentIndex", String(currentIndex + 1));
   location.href = "index.html";
 };
 </script>
