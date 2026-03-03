@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>テスト追加画面</title>
+<style>
+body{font-family:"MS Mincho",serif;padding:15px;}
+textarea{width:100%;height:80px;}
+input{width:100%;}
+button{margin-top:10px;padding:6px 10px;}
+</style>
+</head>
+<body>
+
+<h2>テスト問題追加</h2>
+
+年度<input id="year">
+カテゴリ<input id="category">
+問題<textarea id="question"></textarea>
+選択肢(カンマ区切り)<input id="choices">
+正解番号(カンマ区切り)<input id="answers">
+順序固定？<input type="checkbox" id="order">
+
+<button onclick="generate()">JSON生成</button>
+
+<pre id="output"></pre>
+
+<script>
+function generate(){
+  const obj={
+    id: Date.now(),
+    year: document.getElementById("year").value,
+    label: "2級",
+    category: document.getElementById("category").value,
+    type: "multi_blank",
+    question: document.getElementById("question").value,
+    choices: document.getElementById("choices").value.split(","),
+    answers: document.getElementById("answers").value
+              .split(",").map(Number),
+    orderMatters: document.getElementById("order").checked,
+    explanation: ""
+  };
+
+  document.getElementById("output").innerText=
+    JSON.stringify(obj,null,2);
+}
+</script>
+
+</body>
+</html>
