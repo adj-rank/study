@@ -10,69 +10,19 @@ body{
   font-family:sans-serif;
   font-size:16px;
   padding:15px;
-  margin:0;
-  overflow-x:hidden;
 }
 
-/* タイトル（通常ウェイト） */
-#title{
-  font-size:16px;
-  margin-bottom:10px;
-}
-
-/* 解説本文エリア */
-#explanationArea{
-  white-space:pre-wrap;
-  line-height:1.7;
-  border:1px solid #ccc;
-  padding:10px;
-  max-height:70vh;
-  overflow-y:auto;
-  overflow-x:hidden;
-  margin-bottom:15px;
-  box-sizing:border-box;
-}
-
-/* 区切り線 */
-.hr{
+#imageArea img{
   width:100%;
-  max-width:100%;
-  border:none;
+  height:auto;
+  border:1px solid #ccc;
+  border-radius:8px;
+  margin:10px 0;
+}
+
+.hr{
   border-top:1px solid #666;
   margin:16px 0;
-  box-sizing:border-box;
-}
-
-/* ボタン共通 */
-button{
-  width:100%;
-  margin:8px 0;
-  padding:12px;
-  font-size:16px;
-  border-radius:8px;
-  border:none;
-}
-
-/* 問題に戻る */
-#backBtn{
-  background:#8fd19e;
-  color:#000;
-}
-
-/* 次の問題 */
-#nextBtn{
-  background:#007bff;
-  color:#fff;
-}
-
-/* トップへ戻る */
-#topBtn{
-  background:#007bff;
-  color:#fff;
-}
-
-.hidden{
-  display:none;
 }
 </style>
 </head>
@@ -80,53 +30,28 @@ button{
 <body>
 
 <div id="title"></div>
-
+<div id="imageArea"></div>
 <div id="explanationArea"></div>
 
-<button id="backBtn">問題に戻る</button>
-<button id="nextBtn">次の問題</button>
-<button id="topBtn" class="hidden">トップへ戻る</button>
+<button onclick="history.back()">問題に戻る</button>
 
 <script>
-function normalizeText(str){
-  if(!str) return "";
+const data=JSON.parse(localStorage.getItem("explanationData")||"{}");
 
-  return str
-    .replace(/\\n/g, "\n")
-    .replace(/\[\[SEPARATOR\]\]/g, "\n<hr class='hr'>\n");
+document.getElementById("title").textContent=
+(data.year||"")+"年度 "+(data.label||"");
+
+if(data.images){
+  const imageArea=document.getElementById("imageArea");
+  data.images.forEach(src=>{
+    const img=document.createElement("img");
+    img.src=src;
+    imageArea.appendChild(img);
+  });
 }
 
-const data =
-  JSON.parse(localStorage.getItem("explanationData") || "{}");
-
-document.getElementById("title").textContent =
-  (data.year || "") + "年度 " + (data.label || "");
-
-document.getElementById("explanationArea").innerHTML =
-  normalizeText(data.explanation);
-
-const isLast = data.isLast === true;
-
-if(isLast){
-  document.getElementById("backBtn").classList.add("hidden");
-  document.getElementById("nextBtn").classList.add("hidden");
-  document.getElementById("topBtn").classList.remove("hidden");
-}
-
-document.getElementById("backBtn").onclick = () => {
-  localStorage.setItem("returnMode", "back");
-  location.href = "index.html";
-};
-
-document.getElementById("nextBtn").onclick = () => {
-  localStorage.setItem("returnMode", "next");
-  location.href = "index.html";
-};
-
-document.getElementById("topBtn").onclick = () => {
-  localStorage.removeItem("returnMode");
-  location.href = "index.html";
-};
+document.getElementById("explanationArea").textContent=
+data.explanation||"";
 </script>
 
 </body>
