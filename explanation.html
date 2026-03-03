@@ -7,11 +7,11 @@
 
 <style>
 body{
-  font-family:"MS Mincho", serif;
-  font-size:16px;
+  font-family:sans-serif;   /* ← 問題画面と統一 */
+  font-size:16px;           /* ← 問題画面と統一 */
   padding:15px;
   margin:0;
-  overflow-x:hidden;              /* ★ ページ全体の横スクロール禁止 */
+  overflow-x:hidden;
 }
 
 /* タイトル */
@@ -28,19 +28,19 @@ body{
   padding:10px;
   max-height:70vh;
   overflow-y:auto;
-  overflow-x:hidden;              /* ★ 横方向は必ず隠す */
+  overflow-x:hidden;
   margin-bottom:15px;
-  box-sizing:border-box;          /* ★ padding込みで幅計算 */
+  box-sizing:border-box;
 }
 
-/* 区切り線（完全スマホ対応） */
+/* 区切り線 */
 .hr{
-  width:100%;                     /* ★ 親幅に合わせる */
+  width:100%;
   max-width:100%;
   border:none;
   border-top:1px solid #666;
   margin:16px 0;
-  box-sizing:border-box;          /* ★ はみ出し防止 */
+  box-sizing:border-box;
 }
 
 /* ボタン共通 */
@@ -53,19 +53,19 @@ button{
   border:none;
 }
 
-/* 問題に戻る（薄い緑） */
+/* 問題に戻る */
 #backBtn{
   background:#8fd19e;
   color:#000;
 }
 
-/* 次の問題（青） */
+/* 次の問題 */
 #nextBtn{
   background:#007bff;
   color:#fff;
 }
 
-/* トップへ戻る（青） */
+/* トップへ戻る */
 #topBtn{
   background:#007bff;
   color:#fff;
