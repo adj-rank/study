@@ -1,1 +1,152 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>問題追加ツール</title>
+
+<style>
+body{
+  font-family:sans-serif;
+  padding:15px;
+  margin:0;
+  font-size:16px;
+}
+h2{margin-top:0;}
+
+label{
+  font-weight:bold;
+  display:block;
+  margin-top:12px;
+}
+
+input, textarea, select{
+  width:100%;
+  padding:10px;
+  font-size:16px;
+  margin-top:5px;
+  box-sizing:border-box;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+textarea{
+  min-height:100px;
+  white-space:pre-wrap;
+}
+
+button{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  background:#007bff;
+  color:#fff;
+}
+
+pre{
+  background:#f4f4f4;
+  padding:10px;
+  white-space:pre-wrap;
+  border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>問題追加ツール</h2>
+
+<label>年度</label>
+<input id="year" placeholder="例：2025">
+
+<label>級</label>
+<input id="label" placeholder="例：2級">
+
+<label>カテゴリ</label>
+<input id="category" placeholder="例：自動車材料">
+
+<label>順序</label>
+<select id="order">
+  <option value="false">順序不問</option>
+  <option value="true">順序固定</option>
+</select>
+
+<label>問題文</label>
+<textarea id="question"></textarea>
+
+<label>画像パス（複数は ; 区切り）</label>
+<input id="images" placeholder="images/2025/2kyu/auto/q013_01.jpg">
+
+<label>選択肢（1行ずつ）</label>
+<textarea id="choices" placeholder="ア&#10;イ&#10;ウ&#10;エ"></textarea>
+
+<label>正解（例：エ,キ,ク または 3,6,7）</label>
+<input id="answers">
+
+<label>解説</label>
+<textarea id="explanation"></textarea>
+
+<button onclick="buildJSON()">JSON生成</button>
+
+<h3>生成結果</h3>
+<pre id="output"></pre>
+
+<script>
+function buildJSON(){
+
+  const year = document.getElementById("year").value.trim();
+  const label = document.getElementById("label").value.trim();
+  const category = document.getElementById("category").value.trim();
+  const orderMatters = document.getElementById("order").value === "true";
+  const question = document.getElementById("question").value;
+  const explanation = document.getElementById("explanation").value;
+
+  const choices = document.getElementById("choices")
+    .value.split(/\r?\n/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const imageRaw = document.getElementById("images").value.trim();
+  const images = imageRaw ? imageRaw.split(";").map(s=>s.trim()) : [];
+
+  const ansTokens = document.getElementById("answers")
+    .value.split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const indices = [];
+
+  ansTokens.forEach(token=>{
+    if(/^\d+$/.test(token)){
+      indices.push(Number(token));
+    }else{
+      const idx = choices.indexOf(token);
+      if(idx !== -1) indices.push(idx);
+    }
+  });
+
+  const obj = {
+    year,
+    label,
+    category,
+    type:"multi_blank",
+    question,
+    choices,
+    answers:indices,
+    orderMatters,
+    explanation
+  };
+
+  if(images.length>0) obj.images = images;
+
+  document.getElementById("output").textContent =
+    JSON.stringify(obj, null, 2);
+}
+</script>
+
+</body>
+</html>
