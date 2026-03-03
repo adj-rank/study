@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "year": "2025",
+    "label": "2級",
+    "category": "動作確認",
+    "type": "multi_blank",
+    "question": "テスト問題です。正しいものを2つ選びなさい。",
+    "choices": ["ア","イ","ウ","エ"],
+    "answers": [1,3],
+    "orderMatters": false,
+    "explanation": "これは動作確認用の解説です。"
+  }
+]
