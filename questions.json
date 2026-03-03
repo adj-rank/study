@@ -1,5 +1,6 @@
 [
   {
+    "id": "2025-L2-auto_materials-Q001",
     "year": "2025",
     "label": "2級",
     "category": "自動車材料",
@@ -12,6 +13,7 @@
   },
 
   {
+    "id": "2025-L2-resin-Q001",
     "year": "2025",
     "label": "2級",
     "category": "樹脂",
@@ -24,6 +26,7 @@
   },
 
   {
+    "id": "2025-L2-dynamics-Q001",
     "year": "2025",
     "label": "2級",
     "category": "運動特性",
@@ -36,6 +39,7 @@
   },
 
   {
+    "id": "2025-L2-repair-Q001",
     "year": "2025",
     "label": "2級",
     "category": "修理技法",
@@ -48,6 +52,7 @@
   },
 
   {
+    "id": "2025-L2-truck-Q001",
     "year": "2025",
     "label": "2級",
     "category": "トラック",
@@ -60,6 +65,7 @@
   },
 
   {
+    "id": "2024-L2-auto_materials-Q001",
     "year": "2024",
     "label": "2級",
     "category": "自動車材料",
