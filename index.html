@@ -79,13 +79,11 @@ button{
 
 <body>
 
-<!-- トップ画面 -->
 <div id="topScreen">
   <h3>技術アジャスター試験問題</h3>
   <div id="categoryArea"></div>
 </div>
 
-<!-- 問題画面 -->
 <div id="quizScreen" class="hidden">
   <div id="titleArea"></div>
   <div id="questionArea"></div>
@@ -121,7 +119,6 @@ fetch("questions.json")
   .then(data => {
     questions = data;
     loadCategories();
-    restoreFromExplanation(); // ★ ここだけ
   });
 
 function loadCategories(){
@@ -137,44 +134,10 @@ function loadCategories(){
   });
 }
 
-/* ====== ここが重要 ====== */
-function restoreFromExplanation(){
-  const mode = localStorage.getItem("returnMode");
-  if(!mode) return; // ★ なければ絶対トップ
-
-  localStorage.removeItem("returnMode");
-
-  const cat = localStorage.getItem("currentCategory");
-  let idx = parseInt(localStorage.getItem("currentIndex") || "0", 10);
-
-  if(!cat) return;
-
-  currentCategory = cat;
-  filteredQuestions = questions.filter(q => q.category === cat);
-
-  if(mode === "next") idx++;
-  if(idx >= filteredQuestions.length){
-    goTop();
-    return;
-  }
-
-  currentIndex = idx;
-
-  document.getElementById("topScreen").classList.add("hidden");
-  document.getElementById("quizScreen").classList.remove("hidden");
-
-  scrollToTop();
-  showQuestion();
-}
-/* ======================= */
-
 function startQuiz(category){
   currentCategory = category;
   filteredQuestions = questions.filter(q => q.category === category);
   currentIndex = 0;
-
-  localStorage.setItem("currentCategory", category);
-  localStorage.setItem("currentIndex", "0");
 
   document.getElementById("topScreen").classList.add("hidden");
   document.getElementById("quizScreen").classList.remove("hidden");
@@ -196,8 +159,10 @@ function showQuestion(){
   document.getElementById("titleArea").textContent =
     q.year + "年度" + (q.label ? " " + q.label : "");
 
-  // orderMatters が false の場合、問題文の末尾に注記（任意）
-  const note = (q.orderMatters === false) ? "\n\n※この問題は「順序不問」です。" : "";
+  const note = (q.orderMatters === false)
+    ? "\n\n※この問題は順序不問です"
+    : "";
+
   document.getElementById("questionArea").textContent =
     normalizeText(q.question) + note;
 
@@ -224,10 +189,13 @@ function showQuestion(){
     const select = document.createElement("select");
     select.innerHTML =
       "<option value=''>選択してください</option>" +
-      q.choices.map((c, idx) => `<option value="${idx}">${c}</option>`).join("");
+      q.choices.map((c, idx) =>
+        `<option value="${idx}">${c}</option>`
+      ).join("");
 
     select.onchange = () => {
-      selectedAnswers[i] = select.value === "" ? null : Number(select.value);
+      selectedAnswers[i] =
+        select.value === "" ? null : Number(select.value);
     };
 
     row.appendChild(select);
@@ -242,105 +210,60 @@ function showQuestion(){
   });
 
   document.getElementById("answerBtn").onclick = () => checkAnswer(q);
-  document.getElementById("explainBtn").onclick = () => goExplanation(q);
-
-  const isLast = currentIndex === filteredQuestions.length - 1;
-  document.getElementById("nextBtnInQuiz").classList.toggle("hidden", isLast);
-  document.getElementById("topBtnInQuiz").classList.toggle("hidden", !isLast);
 }
 
-/**
- * 順序不問の判定：
- * - 正誤は「選択された集合」と「正解集合」が一致するか（重複も考慮）
- * - 表示は各空欄について「あなたの選択が正解集合に入っているか」を、残数を減らしながら判定
- */
 function checkAnswer(q){
-  const orderMatters = (q.orderMatters !== false); // 未指定は true扱い
+
+  const orderMatters = (q.orderMatters !== false);
   const correct = q.answers.slice();
 
-  // 未回答チェック（未回答があるなら、そのまま判定して表示）
-  // ※ここは好みで「未回答があります」と出してreturnでもOK
-
   if(orderMatters){
-    // 従来通り：位置固定で判定
+
     q.answers.forEach((c, i) => {
       if(selectedAnswers[i] === c){
         resultDivs[i].textContent = "⭕ 正解";
         resultDivs[i].className = "answer-result correct";
       }else{
-        resultDivs[i].textContent = "❌ 正解：" + q.choices[c];
+        resultDivs[i].textContent =
+          "❌ 正解：" + q.choices[c];
         resultDivs[i].className = "answer-result wrong";
       }
     });
+
   }else{
-    // 1) 全体一致（マルチセット一致）チェック
-    const sel = selectedAnswers.slice().filter(v => v !== null).sort((a,b)=>a-b);
-    const cor = correct.slice().sort((a,b)=>a-b);
-    const allAnswered = selectedAnswers.every(v => v !== null);
 
-    const sameLength = sel.length === cor.length;
-    let allMatch = sameLength;
-    if(allMatch){
-      for(let i=0;i<sel.length;i++){
-        if(sel[i] !== cor[i]){
-          allMatch = false;
-          break;
-        }
-      }
-    }
+    const pool = correct.slice();
 
-    // 2) 表示：各空欄ごとに「正解集合に存在するか」を残数方式で判定
-    //    (同じ選択肢が複数回正解にある場合も正しく処理)
-    const pool = correct.slice(); // 残っている正解
     selectedAnswers.forEach((ans, i) => {
+
       if(ans === null){
         resultDivs[i].textContent = "❌ 未選択";
         resultDivs[i].className = "answer-result wrong";
         return;
       }
+
       const idx = pool.indexOf(ans);
+
       if(idx !== -1){
-        pool.splice(idx, 1);
-        resultDivs[i].textContent = "⭕ 正解（順序不問）";
-        resultDivs[i].className = "answer-result correct";
+        pool.splice(idx,1);
+        resultDivs[i].textContent =
+          "⭕ 正解（順序不問）";
+        resultDivs[i].className =
+          "answer-result correct";
       }else{
-        // 不正解時は「残っている正解」を参考表示（1つだけ見せる）
-        const hint = (pool.length > 0) ? (" / 残り候補：" + pool.map(x=>q.choices[x]).join("、")) : "";
-        resultDivs[i].textContent = "❌ 不正解" + hint;
-        resultDivs[i].className = "answer-result wrong";
+        resultDivs[i].textContent =
+          "❌ 不正解";
+        resultDivs[i].className =
+          "answer-result wrong";
       }
     });
 
-    // 3) 全体メッセージ（任意）：全部答えていて全体一致なら、全て正解の意味になる
-    // （ここではUIを増やさず、各欄表示のみ）
   }
 
-  document.getElementById("answerBtn").classList.add("hidden");
-  document.getElementById("explainBtn").classList.remove("hidden");
-}
-
-function goExplanation(q){
-  localStorage.setItem("currentCategory", currentCategory);
-  localStorage.setItem("currentIndex", String(currentIndex));
-  localStorage.setItem("returnMode", "back");
-
-  const isLast = currentIndex === filteredQuestions.length - 1;
-
-  localStorage.setItem("explanationData", JSON.stringify({
-    year: q.year,
-    label: q.label || "",
-    explanation: q.explanation || "",
-    isLast: isLast
-  }));
-
-  location.href = "explanation.html";
-}
-
-function nextQuestion(){
-  currentIndex++;
-  localStorage.setItem("currentIndex", String(currentIndex));
-  scrollToTop();
-  showQuestion();
+  document.getElementById("answerBtn")
+    .classList.add("hidden");
+  document.getElementById("explainBtn")
+    .classList.remove("hidden");
 }
 </script>
 
