@@ -1,96 +1,352 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>テスト問題画面</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>技術アジャスター試験問題</title>
+
 <style>
-body{font-family:"MS Mincho",serif;font-size:16px;padding:15px;}
-.choice{display:block;margin:6px 0;}
-button{margin-top:10px;padding:8px 12px;}
-.correct{color:blue;}
-.wrong{color:red;}
+body{
+  font-family:sans-serif;
+  padding:15px;
+  margin:0;
+  font-size:16px;
+}
+
+#topScreen h3{
+  text-align:center;
+  margin:0 0 16px 0;
+}
+
+#titleArea{
+  font-size:16px;
+  margin-bottom:8px;
+}
+
+#questionArea{
+  font-size:16px;
+  line-height:1.7;
+  white-space:pre-wrap;
+  border:1px solid #ccc;
+  padding:10px;
+  margin-bottom:15px;
+  max-height:40vh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  box-sizing:border-box;
+}
+
+#questionArea img{
+  width:100%;
+  margin-top:10px;
+  border:1px solid #ccc;
+  border-radius:6px;
+}
+
+.answer-block{ margin-bottom:12px; }
+
+.answer-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.answer-row label{
+  min-width:60px;
+}
+
+select{
+  flex:1;
+  padding:10px;
+  font-size:16px;
+}
+
+.answer-result{
+  margin-left:60px;
+  font-size:16px;
+  line-height:1.6;
+}
+
+button{
+  width:100%;
+  margin:8px 0;
+  padding:12px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  background:#007bff;
+  color:#fff;
+}
+
+#explainBtn{
+  background:#8fd19e;
+  color:#000;
+}
+
+.correct{ color:green; font-weight:bold; }
+.wrong{ color:red; font-weight:bold; }
+.hidden{ display:none; }
 </style>
 </head>
+
 <body>
 
-<h2>テスト問題画面</h2>
+<div id="topScreen">
+  <h3>技術アジャスター試験問題</h3>
+  <div id="categoryArea"></div>
+</div>
 
-<div id="question"></div>
-<div id="choices"></div>
+<div id="quizScreen" class="hidden">
+  <div id="titleArea"></div>
+  <div id="questionArea"></div>
+  <div id="answersArea"></div>
 
-<button onclick="checkAnswer()">判定</button>
-<button onclick="goExplanation()">解説へ</button>
+  <button id="answerBtn">解答</button>
+  <button id="explainBtn" class="hidden">解説を見る</button>
 
-<div id="result"></div>
+  <button id="nextBtnInQuiz" onclick="nextQuestion()">次の問題</button>
+  <button id="topBtnInQuiz" class="hidden" onclick="goTop()">トップへ戻る</button>
+</div>
 
 <script>
-let questions=[];
-let current=0;
+let questions = [];
+let filteredQuestions = [];
+let currentIndex = 0;
+let currentCategory = null;
 
-fetch("test_questions.json")
-.then(r=>r.json())
-.then(data=>{
-  questions=data;
-  loadQuestion();
-});
+let selectedAnswers = [];
+let resultDivs = [];
 
-function loadQuestion(){
-  const q=questions[current];
-  document.getElementById("question").innerText=
-    q.year+" "+q.category+"\n\n"+q.question;
+function scrollToTop(){
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
 
-  const area=document.getElementById("choices");
-  area.innerHTML="";
+function normalizeText(str){
+  if(!str) return "";
+  return str.replace(/\\n/g, "\n");
+}
 
-  q.choices.forEach((c,i)=>{
-    area.innerHTML+=
-    `<label class="choice">
-      <input type="checkbox" value="${i}"> ${c}
-     </label>`;
+fetch("questions.json")
+  .then(res => res.json())
+  .then(data => {
+    questions = data;
+    loadCategories();
+    restoreFromExplanation();
+  });
+
+function loadCategories(){
+  const area = document.getElementById("categoryArea");
+  area.innerHTML = "";
+  const categories = [...new Set(questions.map(q => q.category))];
+
+  categories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.textContent = cat;
+    btn.onclick = () => startQuiz(cat);
+    area.appendChild(btn);
   });
 }
 
-function checkAnswer(){
-  const q=questions[current];
-  const checked=[...document.querySelectorAll("input:checked")]
-    .map(e=>Number(e.value));
+function restoreFromExplanation(){
+  const mode = localStorage.getItem("returnMode");
+  if(!mode) return;
 
-  let correct=false;
+  localStorage.removeItem("returnMode");
 
-  if(q.orderMatters){
-    correct=JSON.stringify(checked)===JSON.stringify(q.answers);
-  }else{
-    correct=
-      checked.length===q.answers.length &&
-      checked.every(v=>q.answers.includes(v));
+  const cat = localStorage.getItem("currentCategory");
+  let idx = parseInt(localStorage.getItem("currentIndex") || "0", 10);
+  if(!cat) return;
+
+  currentCategory = cat;
+  filteredQuestions = questions.filter(q => q.category === cat);
+
+  if(mode === "next") idx++;
+  if(idx >= filteredQuestions.length){
+    goTop();
+    return;
   }
 
-  const result=document.getElementById("result");
+  currentIndex = idx;
 
-  if(correct){
-    result.innerHTML="<span class='correct'>⭕ 正解</span>";
-  }else{
-    let msg="<span class='wrong'>❌ 不正解</span><br>";
-    const wrong=checked.filter(v=>!q.answers.includes(v));
-    const missing=q.answers.filter(v=>!checked.includes(v));
+  document.getElementById("topScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
 
-    wrong.forEach(v=>{
-      msg+="× "+q.choices[v];
-      if(missing.length){
-        msg+=" → 正: "+q.choices[missing.shift()];
-      }
-      msg+="<br>";
-    });
-
-    result.innerHTML=msg;
-  }
+  scrollToTop();
+  showQuestion();
 }
 
-function goExplanation(){
-  localStorage.setItem("testExplanation",
-    JSON.stringify(questions[current]));
-  location.href="test_explanation.html";
+function startQuiz(category){
+  currentCategory = category;
+  filteredQuestions = questions.filter(q => q.category === category);
+  currentIndex = 0;
+
+  localStorage.setItem("currentCategory", category);
+  localStorage.setItem("currentIndex", "0");
+
+  document.getElementById("topScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
+
+  scrollToTop();
+  showQuestion();
+}
+
+function goTop(){
+  document.getElementById("quizScreen").classList.add("hidden");
+  document.getElementById("topScreen").classList.remove("hidden");
+  scrollToTop();
+}
+
+function showQuestion(){
+  const q = filteredQuestions[currentIndex];
+  if(!q) return;
+
+  document.getElementById("titleArea").textContent =
+    q.year + "年度" + (q.label ? " " + q.label : "");
+
+  const questionArea = document.getElementById("questionArea");
+  questionArea.innerHTML = "";
+
+  // 問題文
+  const textDiv = document.createElement("div");
+  textDiv.textContent = normalizeText(q.question);
+  questionArea.appendChild(textDiv);
+
+  // ★ 画像表示処理
+  if(q.images && q.images.length > 0){
+    q.images.forEach(src => {
+      const img = document.createElement("img");
+      img.src = src;
+      questionArea.appendChild(img);
+    });
+  }
+
+  const answersDiv = document.getElementById("answersArea");
+  answersDiv.innerHTML = "";
+
+  document.getElementById("answerBtn").classList.remove("hidden");
+  document.getElementById("explainBtn").classList.add("hidden");
+
+  selectedAnswers = new Array(q.answers.length).fill(null);
+  resultDivs = [];
+
+  q.answers.forEach((_, i) => {
+    const block = document.createElement("div");
+    block.className = "answer-block";
+
+    const row = document.createElement("div");
+    row.className = "answer-row";
+
+    const label = document.createElement("label");
+    label.textContent = "空欄" + (i + 1);
+    row.appendChild(label);
+
+    const select = document.createElement("select");
+    select.innerHTML =
+      "<option value=''>選択してください</option>" +
+      q.choices.map((c, idx) =>
+        `<option value="${idx}">${c}</option>`
+      ).join("");
+
+    select.onchange = () => {
+      selectedAnswers[i] =
+        select.value === "" ? null : Number(select.value);
+    };
+
+    row.appendChild(select);
+    block.appendChild(row);
+
+    const result = document.createElement("div");
+    result.className = "answer-result";
+    block.appendChild(result);
+
+    resultDivs.push(result);
+    answersDiv.appendChild(block);
+  });
+
+  document.getElementById("answerBtn").onclick = () => checkAnswer(q);
+  document.getElementById("explainBtn").onclick = () => goExplanation(q);
+
+  const isLast = currentIndex === filteredQuestions.length - 1;
+  document.getElementById("nextBtnInQuiz").classList.toggle("hidden", isLast);
+  document.getElementById("topBtnInQuiz").classList.toggle("hidden", !isLast);
+}
+
+function checkAnswer(q){
+  const orderMatters = (q.orderMatters !== false);
+
+  if(orderMatters){
+
+    q.answers.forEach((c, i) => {
+      if(selectedAnswers[i] === c){
+        resultDivs[i].textContent = "⭕ 正解";
+        resultDivs[i].className = "answer-result correct";
+      }else{
+        resultDivs[i].textContent =
+          "❌ 正解：" + q.choices[c];
+        resultDivs[i].className =
+          "answer-result wrong";
+      }
+    });
+
+  }else{
+
+    let remaining = q.answers.slice();
+    const correctFlags = new Array(selectedAnswers.length).fill(false);
+
+    selectedAnswers.forEach((ans, i) => {
+      if(ans === null) return;
+      const idx = remaining.indexOf(ans);
+      if(idx !== -1){
+        correctFlags[i] = true;
+        remaining.splice(idx, 1);
+      }
+    });
+
+    const remainLabels = remaining.map(x => q.choices[x]).join("、");
+    const remainText = remainLabels ? remainLabels : "—";
+
+    selectedAnswers.forEach((ans, i) => {
+      if(correctFlags[i]){
+        resultDivs[i].textContent =
+          "⭕ 正解（順序不問）";
+        resultDivs[i].className =
+          "answer-result correct";
+      }else{
+        resultDivs[i].textContent =
+          "❌ 正解：" + remainText;
+        resultDivs[i].className =
+          "answer-result wrong";
+      }
+    });
+  }
+
+  document.getElementById("answerBtn").classList.add("hidden");
+  document.getElementById("explainBtn").classList.remove("hidden");
+}
+
+function goExplanation(q){
+  localStorage.setItem("currentCategory", currentCategory);
+  localStorage.setItem("currentIndex", String(currentIndex));
+  localStorage.setItem("returnMode", "back");
+
+  const isLast =
+    currentIndex === filteredQuestions.length - 1;
+
+  localStorage.setItem("explanationData", JSON.stringify({
+    year: q.year,
+    label: q.label || "",
+    explanation: q.explanation || "",
+    isLast: isLast
+  }));
+
+  location.href = "explanation.html";
+}
+
+function nextQuestion(){
+  currentIndex++;
+  localStorage.setItem("currentIndex", String(currentIndex));
+  scrollToTop();
+  showQuestion();
 }
 </script>
 
