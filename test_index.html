@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>テスト問題画面</title>
+<style>
+body{font-family:"MS Mincho",serif;font-size:16px;padding:15px;}
+.choice{display:block;margin:6px 0;}
+button{margin-top:10px;padding:8px 12px;}
+.correct{color:blue;}
+.wrong{color:red;}
+</style>
+</head>
+<body>
+
+<h2>テスト問題画面</h2>
+
+<div id="question"></div>
+<div id="choices"></div>
+
+<button onclick="checkAnswer()">判定</button>
+<button onclick="goExplanation()">解説へ</button>
+
+<div id="result"></div>
+
+<script>
+let questions=[];
+let current=0;
+
+fetch("test_questions.json")
+.then(r=>r.json())
+.then(data=>{
+  questions=data;
+  loadQuestion();
+});
+
+function loadQuestion(){
+  const q=questions[current];
+  document.getElementById("question").innerText=
+    q.year+" "+q.category+"\n\n"+q.question;
+
+  const area=document.getElementById("choices");
+  area.innerHTML="";
+
+  q.choices.forEach((c,i)=>{
+    area.innerHTML+=
+    `<label class="choice">
+      <input type="checkbox" value="${i}"> ${c}
+     </label>`;
+  });
+}
+
+function checkAnswer(){
+  const q=questions[current];
+  const checked=[...document.querySelectorAll("input:checked")]
+    .map(e=>Number(e.value));
+
+  let correct=false;
+
+  if(q.orderMatters){
+    correct=JSON.stringify(checked)===JSON.stringify(q.answers);
+  }else{
+    correct=
+      checked.length===q.answers.length &&
+      checked.every(v=>q.answers.includes(v));
+  }
+
+  const result=document.getElementById("result");
+
+  if(correct){
+    result.innerHTML="<span class='correct'>⭕ 正解</span>";
+  }else{
+    let msg="<span class='wrong'>❌ 不正解</span><br>";
+    const wrong=checked.filter(v=>!q.answers.includes(v));
+    const missing=q.answers.filter(v=>!checked.includes(v));
+
+    wrong.forEach(v=>{
+      msg+="× "+q.choices[v];
+      if(missing.length){
+        msg+=" → 正: "+q.choices[missing.shift()];
+      }
+      msg+="<br>";
+    });
+
+    result.innerHTML=msg;
+  }
+}
+
+function goExplanation(){
+  localStorage.setItem("testExplanation",
+    JSON.stringify(questions[current]));
+  location.href="test_explanation.html";
+}
+</script>
+
+</body>
+</html>
