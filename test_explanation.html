@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>テスト解説画面</title>
+<style>
+body{font-family:"MS Mincho",serif;font-size:16px;padding:15px;}
+button{margin-top:10px;padding:8px 12px;}
+</style>
+</head>
+<body>
+
+<h2>テスト解説画面</h2>
+
+<div id="explanation"></div>
+
+<button onclick="back()">戻る</button>
+
+<script>
+const data=
+JSON.parse(localStorage.getItem("testExplanation")||"{}");
+
+document.getElementById("explanation").innerText=
+  data.explanation || "解説なし";
+
+function back(){
+  location.href="test_index.html";
+}
+</script>
+
+</body>
+</html>
