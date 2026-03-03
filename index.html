@@ -13,126 +13,321 @@ body{
   font-size:16px;
 }
 
+#topScreen h3{
+  text-align:center;
+  margin:0 0 16px 0;
+}
+
+#titleArea{
+  font-size:16px;
+  margin-bottom:8px;
+}
+
 #questionArea{
+  font-size:16px;
+  line-height:1.7;
   white-space:pre-wrap;
   border:1px solid #ccc;
   padding:10px;
   margin-bottom:15px;
+  max-height:40vh;
+  overflow-y:auto;
 }
 
-#imageArea{
-  margin-bottom:15px;
-}
+.answer-block{ margin-bottom:12px; }
 
-#imageArea img{
-  width:100%;
-  height:auto;
-  border:1px solid #ccc;
-  border-radius:8px;
-  margin:10px 0;
+.answer-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.answer-row label{ min-width:60px; }
+
+select{
+  flex:1;
+  padding:10px;
+  font-size:16px;
 }
 
 .answer-result{
-  margin-top:5px;
+  margin-left:60px;
+  font-size:16px;
+  line-height:1.6;
 }
 
-.correct{color:green;font-weight:bold;}
-.wrong{color:red;font-weight:bold;}
-.hidden{display:none;}
+button{
+  width:100%;
+  margin:8px 0;
+  padding:12px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  background:#007bff;
+  color:#fff;
+}
+
+#explainBtn{
+  background:#8fd19e;
+  color:#000;
+}
+
+.correct{ color:green; font-weight:bold; }
+.wrong{ color:red; font-weight:bold; }
+.hidden{ display:none; }
 </style>
 </head>
 
 <body>
 
-<div id="questionArea"></div>
-<div id="imageArea"></div>
-<div id="answersArea"></div>
+<div id="topScreen">
+  <h3>技術アジャスター試験問題</h3>
+  <div id="categoryArea"></div>
+</div>
 
-<button id="answerBtn">解答</button>
-<button id="explainBtn" class="hidden">解説を見る</button>
+<div id="quizScreen" class="hidden">
+  <div id="titleArea"></div>
+  <div id="questionArea"></div>
+  <div id="answersArea"></div>
+
+  <button id="answerBtn">解答</button>
+  <button id="explainBtn" class="hidden">解説を見る</button>
+
+  <button id="nextBtnInQuiz" onclick="nextQuestion()">次の問題</button>
+  <button id="topBtnInQuiz" class="hidden" onclick="goTop()">トップへ戻る</button>
+</div>
 
 <script>
-let questions=[];
-let currentIndex=0;
-let selectedAnswers=[];
-let resultDivs=[];
+let questions = [];
+let filteredQuestions = [];
+let currentIndex = 0;
+let currentCategory = null;
+
+let selectedAnswers = [];
+let resultDivs = [];
+
+function scrollToTop(){
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function normalizeText(str){
+  if(!str) return "";
+  return str.replace(/\\n/g, "\n");
+}
 
 fetch("questions.json")
-.then(res=>res.json())
-.then(data=>{
-  questions=data;
-  showQuestion();
-});
-
-function showQuestion(){
-  const q=questions[currentIndex];
-
-  document.getElementById("questionArea").textContent=q.question;
-
-  const imageArea=document.getElementById("imageArea");
-  imageArea.innerHTML="";
-  if(q.images){
-    q.images.forEach(src=>{
-      const img=document.createElement("img");
-      img.src=src;
-      img.loading="lazy";
-      imageArea.appendChild(img);
-    });
-  }
-
-  const answersDiv=document.getElementById("answersArea");
-  answersDiv.innerHTML="";
-  selectedAnswers=new Array(q.answers.length).fill(null);
-  resultDivs=[];
-
-  q.answers.forEach((_,i)=>{
-    const select=document.createElement("select");
-    select.innerHTML="<option value=''>選択</option>"+
-      q.choices.map((c,idx)=>`<option value="${idx}">${c}</option>`).join("");
-    select.onchange=()=>selectedAnswers[i]=Number(select.value);
-
-    const result=document.createElement("div");
-    resultDivs.push(result);
-
-    answersDiv.appendChild(select);
-    answersDiv.appendChild(result);
+  .then(res => res.json())
+  .then(data => {
+    questions = data;
+    loadCategories();
+    restoreFromExplanation();
   });
 
-  document.getElementById("answerBtn").onclick=()=>checkAnswer(q);
-  document.getElementById("explainBtn").onclick=()=>goExplanation(q);
+function loadCategories(){
+  const area = document.getElementById("categoryArea");
+  area.innerHTML = "";
+  const categories = [...new Set(questions.map(q => q.category))];
+
+  categories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.textContent = cat;
+    btn.onclick = () => startQuiz(cat);
+    area.appendChild(btn);
+  });
+}
+
+function restoreFromExplanation(){
+  const mode = localStorage.getItem("returnMode");
+  if(!mode) return;
+
+  localStorage.removeItem("returnMode");
+
+  const cat = localStorage.getItem("currentCategory");
+  let idx = parseInt(localStorage.getItem("currentIndex") || "0", 10);
+  if(!cat) return;
+
+  currentCategory = cat;
+  filteredQuestions = questions.filter(q => q.category === cat);
+
+  if(mode === "next") idx++;
+  if(idx >= filteredQuestions.length){
+    goTop();
+    return;
+  }
+
+  currentIndex = idx;
+
+  document.getElementById("topScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
+
+  scrollToTop();
+  showQuestion();
+}
+
+function startQuiz(category){
+  currentCategory = category;
+  filteredQuestions = questions.filter(q => q.category === category);
+  currentIndex = 0;
+
+  localStorage.setItem("currentCategory", category);
+  localStorage.setItem("currentIndex", "0");
+
+  document.getElementById("topScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
+
+  scrollToTop();
+  showQuestion();
+}
+
+function goTop(){
+  document.getElementById("quizScreen").classList.add("hidden");
+  document.getElementById("topScreen").classList.remove("hidden");
+  scrollToTop();
+}
+
+function showQuestion(){
+  const q = filteredQuestions[currentIndex];
+  if(!q) return;
+
+  document.getElementById("titleArea").textContent =
+    q.year + "年度" + (q.label ? " " + q.label : "");
+
+  document.getElementById("questionArea").textContent =
+    normalizeText(q.question);
+
+  const answersDiv = document.getElementById("answersArea");
+  answersDiv.innerHTML = "";
+
+  document.getElementById("answerBtn").classList.remove("hidden");
+  document.getElementById("explainBtn").classList.add("hidden");
+
+  selectedAnswers = new Array(q.answers.length).fill(null);
+  resultDivs = [];
+
+  q.answers.forEach((_, i) => {
+    const block = document.createElement("div");
+    block.className = "answer-block";
+
+    const row = document.createElement("div");
+    row.className = "answer-row";
+
+    const label = document.createElement("label");
+    label.textContent = "空欄" + (i + 1);
+    row.appendChild(label);
+
+    const select = document.createElement("select");
+    select.innerHTML =
+      "<option value=''>選択してください</option>" +
+      q.choices.map((c, idx) =>
+        `<option value="${idx}">${c}</option>`
+      ).join("");
+
+    select.onchange = () => {
+      selectedAnswers[i] =
+        select.value === "" ? null : Number(select.value);
+    };
+
+    row.appendChild(select);
+    block.appendChild(row);
+
+    const result = document.createElement("div");
+    result.className = "answer-result";
+    block.appendChild(result);
+
+    resultDivs.push(result);
+    answersDiv.appendChild(block);
+  });
+
+  document.getElementById("answerBtn").onclick = () => checkAnswer(q);
+  document.getElementById("explainBtn").onclick = () => goExplanation(q);
+
+  const isLast = currentIndex === filteredQuestions.length - 1;
+  document.getElementById("nextBtnInQuiz").classList.toggle("hidden", isLast);
+  document.getElementById("topBtnInQuiz").classList.toggle("hidden", !isLast);
 }
 
 function checkAnswer(q){
-  let remaining=q.answers.slice();
-  const correctFlags=new Array(selectedAnswers.length).fill(false);
+  const orderMatters = (q.orderMatters !== false);
 
-  selectedAnswers.forEach((ans,i)=>{
-    const idx=remaining.indexOf(ans);
-    if(idx!==-1){
-      correctFlags[i]=true;
-      remaining.splice(idx,1);
-    }
-  });
+  if(orderMatters){
 
-  const remainText=remaining.map(x=>q.choices[x]).join("、");
+    q.answers.forEach((c, i) => {
+      if(selectedAnswers[i] === c){
+        resultDivs[i].textContent = "⭕ 正解";
+        resultDivs[i].className = "answer-result correct";
+      }else{
+        resultDivs[i].textContent =
+          "❌ 正解：" + q.choices[c];
+        resultDivs[i].className =
+          "answer-result wrong";
+      }
+    });
 
-  selectedAnswers.forEach((_,i)=>{
-    if(correctFlags[i]){
-      resultDivs[i].textContent="⭕ 正解";
-      resultDivs[i].className="correct";
-    }else{
-      resultDivs[i].textContent="❌ 正解："+remainText;
-      resultDivs[i].className="wrong";
-    }
-  });
+  }else{
 
-  document.getElementById("answerBtn").classList.add("hidden");
-  document.getElementById("explainBtn").classList.remove("hidden");
+    // ① 正解プール
+    let remaining = q.answers.slice();
+    const correctFlags = new Array(selectedAnswers.length).fill(false);
+
+    // ② まず全体で正解を確定させる
+    selectedAnswers.forEach((ans, i) => {
+      if(ans === null) return;
+
+      const idx = remaining.indexOf(ans);
+      if(idx !== -1){
+        correctFlags[i] = true;
+        remaining.splice(idx, 1);
+      }
+    });
+
+    // ③ 残った正解のみ表示
+    const remainLabels = remaining.map(x => q.choices[x]).join("、");
+    const remainText = remainLabels ? remainLabels : "—";
+
+    selectedAnswers.forEach((ans, i) => {
+      if(correctFlags[i]){
+        resultDivs[i].textContent =
+          "⭕ 正解（順序不問）";
+        resultDivs[i].className =
+          "answer-result correct";
+      }else{
+        resultDivs[i].textContent =
+          "❌ 正解：" + remainText;
+        resultDivs[i].className =
+          "answer-result wrong";
+      }
+    });
+
+  }
+
+  document.getElementById("answerBtn")
+    .classList.add("hidden");
+  document.getElementById("explainBtn")
+    .classList.remove("hidden");
 }
 
 function goExplanation(q){
-  localStorage.setItem("explanationData",JSON.stringify(q));
-  location.href="explanation.html";
+  localStorage.setItem("currentCategory", currentCategory);
+  localStorage.setItem("currentIndex", String(currentIndex));
+  localStorage.setItem("returnMode", "back");
+
+  const isLast =
+    currentIndex === filteredQuestions.length - 1;
+
+  localStorage.setItem("explanationData", JSON.stringify({
+    year: q.year,
+    label: q.label || "",
+    explanation: q.explanation || "",
+    isLast: isLast
+  }));
+
+  location.href = "explanation.html";
+}
+
+function nextQuestion(){
+  currentIndex++;
+  localStorage.setItem("currentIndex", String(currentIndex));
+  scrollToTop();
+  showQuestion();
 }
 </script>
 
