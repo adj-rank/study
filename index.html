@@ -79,13 +79,11 @@ button{
 
 <body>
 
-<!-- トップ画面 -->
 <div id="topScreen">
   <h3>技術アジャスター試験問題</h3>
   <div id="categoryArea"></div>
 </div>
 
-<!-- 問題画面 -->
 <div id="quizScreen" class="hidden">
   <div id="titleArea"></div>
   <div id="questionArea"></div>
@@ -121,7 +119,7 @@ fetch("questions.json")
   .then(data => {
     questions = data;
     loadCategories();
-    restoreFromExplanation(); // ★解説画面から戻った時の復元
+    restoreFromExplanation();
   });
 
 function loadCategories(){
@@ -137,7 +135,6 @@ function loadCategories(){
   });
 }
 
-/* 解説画面から戻る時の復元 */
 function restoreFromExplanation(){
   const mode = localStorage.getItem("returnMode");
   if(!mode) return;
@@ -221,10 +218,13 @@ function showQuestion(){
     const select = document.createElement("select");
     select.innerHTML =
       "<option value=''>選択してください</option>" +
-      q.choices.map((c, idx) => `<option value="${idx}">${c}</option>`).join("");
+      q.choices.map((c, idx) =>
+        `<option value="${idx}">${c}</option>`
+      ).join("");
 
     select.onchange = () => {
-      selectedAnswers[i] = select.value === "" ? null : Number(select.value);
+      selectedAnswers[i] =
+        select.value === "" ? null : Number(select.value);
     };
 
     row.appendChild(select);
@@ -246,43 +246,37 @@ function showQuestion(){
   document.getElementById("topBtnInQuiz").classList.toggle("hidden", !isLast);
 }
 
-/* 不正解時に正答表示（順序不問でも表示） */
 function checkAnswer(q){
-  const orderMatters = (q.orderMatters !== false); // 未指定は true扱い
+  const orderMatters = (q.orderMatters !== false);
   const correctLabels = q.answers.map(i => q.choices[i]).join("、");
 
   if(orderMatters){
-    // 位置固定：空欄ごとに正答を表示
     q.answers.forEach((c, i) => {
       if(selectedAnswers[i] === c){
         resultDivs[i].textContent = "⭕ 正解";
         resultDivs[i].className = "answer-result correct";
       }else{
-        const your = (selectedAnswers[i] === null) ? "未選択" : q.choices[selectedAnswers[i]];
-        resultDivs[i].textContent = "❌ 不正解（あなた：" + your + "） / 正解：" + q.choices[c];
+        resultDivs[i].textContent = "❌ 正解：" + q.choices[c];
         resultDivs[i].className = "answer-result wrong";
       }
     });
-
   }else{
-    // 順序不問：正解集合に含まれるかを残数方式で判定
     const pool = q.answers.slice();
 
     selectedAnswers.forEach((ans, i) => {
       if(ans === null){
-        resultDivs[i].textContent = "❌ 未選択 / 正解：" + correctLabels;
+        resultDivs[i].textContent = "❌ 正解：" + correctLabels;
         resultDivs[i].className = "answer-result wrong";
         return;
       }
 
       const idx = pool.indexOf(ans);
       if(idx !== -1){
-        pool.splice(idx, 1);
+        pool.splice(idx,1);
         resultDivs[i].textContent = "⭕ 正解（順序不問）";
         resultDivs[i].className = "answer-result correct";
       }else{
-        const your = q.choices[ans];
-        resultDivs[i].textContent = "❌ 不正解（あなた：" + your + "） / 正解：" + correctLabels;
+        resultDivs[i].textContent = "❌ 正解：" + correctLabels;
         resultDivs[i].className = "answer-result wrong";
       }
     });
