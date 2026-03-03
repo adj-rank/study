@@ -264,38 +264,39 @@ function checkAnswer(q){
 
   }else{
 
+    // ① 正解プール
     let remaining = q.answers.slice();
+    const correctFlags = new Array(selectedAnswers.length).fill(false);
 
+    // ② まず全体で正解を確定させる
     selectedAnswers.forEach((ans, i) => {
-
-      if(ans === null){
-        const remainLabels =
-          remaining.map(x => q.choices[x]).join("、");
-        resultDivs[i].textContent =
-          "❌ 正解：" + remainLabels;
-        resultDivs[i].className =
-          "answer-result wrong";
-        return;
-      }
+      if(ans === null) return;
 
       const idx = remaining.indexOf(ans);
-
       if(idx !== -1){
-        remaining.splice(idx,1);
+        correctFlags[i] = true;
+        remaining.splice(idx, 1);
+      }
+    });
+
+    // ③ 残った正解のみ表示
+    const remainLabels = remaining.map(x => q.choices[x]).join("、");
+    const remainText = remainLabels ? remainLabels : "—";
+
+    selectedAnswers.forEach((ans, i) => {
+      if(correctFlags[i]){
         resultDivs[i].textContent =
           "⭕ 正解（順序不問）";
         resultDivs[i].className =
           "answer-result correct";
       }else{
-        const remainLabels =
-          remaining.map(x => q.choices[x]).join("、");
         resultDivs[i].textContent =
-          "❌ 正解：" + remainLabels;
+          "❌ 正解：" + remainText;
         resultDivs[i].className =
           "answer-result wrong";
       }
-
     });
+
   }
 
   document.getElementById("answerBtn")
