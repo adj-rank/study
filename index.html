@@ -32,6 +32,15 @@ body{
   margin-bottom:15px;
   max-height:40vh;
   overflow-y:auto;
+  overflow-x:hidden;
+  box-sizing:border-box;
+}
+
+#questionArea img{
+  width:100%;
+  margin-top:10px;
+  border:1px solid #ccc;
+  border-radius:6px;
 }
 
 .answer-block{ margin-bottom:12px; }
@@ -41,7 +50,10 @@ body{
   align-items:center;
   gap:10px;
 }
-.answer-row label{ min-width:60px; }
+
+.answer-row label{
+  min-width:60px;
+}
 
 select{
   flex:1;
@@ -191,8 +203,22 @@ function showQuestion(){
   document.getElementById("titleArea").textContent =
     q.year + "年度" + (q.label ? " " + q.label : "");
 
-  document.getElementById("questionArea").textContent =
-    normalizeText(q.question);
+  const questionArea = document.getElementById("questionArea");
+  questionArea.innerHTML = "";
+
+  // 問題文
+  const textDiv = document.createElement("div");
+  textDiv.textContent = normalizeText(q.question);
+  questionArea.appendChild(textDiv);
+
+  // ★ 画像表示処理
+  if(q.images && q.images.length > 0){
+    q.images.forEach(src => {
+      const img = document.createElement("img");
+      img.src = src;
+      questionArea.appendChild(img);
+    });
+  }
 
   const answersDiv = document.getElementById("answersArea");
   answersDiv.innerHTML = "";
@@ -264,14 +290,11 @@ function checkAnswer(q){
 
   }else{
 
-    // ① 正解プール
     let remaining = q.answers.slice();
     const correctFlags = new Array(selectedAnswers.length).fill(false);
 
-    // ② まず全体で正解を確定させる
     selectedAnswers.forEach((ans, i) => {
       if(ans === null) return;
-
       const idx = remaining.indexOf(ans);
       if(idx !== -1){
         correctFlags[i] = true;
@@ -279,7 +302,6 @@ function checkAnswer(q){
       }
     });
 
-    // ③ 残った正解のみ表示
     const remainLabels = remaining.map(x => q.choices[x]).join("、");
     const remainText = remainLabels ? remainLabels : "—";
 
@@ -296,13 +318,10 @@ function checkAnswer(q){
           "answer-result wrong";
       }
     });
-
   }
 
-  document.getElementById("answerBtn")
-    .classList.add("hidden");
-  document.getElementById("explainBtn")
-    .classList.remove("hidden");
+  document.getElementById("answerBtn").classList.add("hidden");
+  document.getElementById("explainBtn").classList.remove("hidden");
 }
 
 function goExplanation(q){
