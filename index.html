@@ -196,8 +196,10 @@ function showQuestion(){
   document.getElementById("titleArea").textContent =
     q.year + "年度" + (q.label ? " " + q.label : "");
 
+  // orderMatters が false の場合、問題文の末尾に注記（任意）
+  const note = (q.orderMatters === false) ? "\n\n※この問題は「順序不問」です。" : "";
   document.getElementById("questionArea").textContent =
-    normalizeText(q.question);
+    normalizeText(q.question) + note;
 
   const answersDiv = document.getElementById("answersArea");
   answersDiv.innerHTML = "";
@@ -247,16 +249,71 @@ function showQuestion(){
   document.getElementById("topBtnInQuiz").classList.toggle("hidden", !isLast);
 }
 
+/**
+ * 順序不問の判定：
+ * - 正誤は「選択された集合」と「正解集合」が一致するか（重複も考慮）
+ * - 表示は各空欄について「あなたの選択が正解集合に入っているか」を、残数を減らしながら判定
+ */
 function checkAnswer(q){
-  q.answers.forEach((correct, i) => {
-    if(selectedAnswers[i] === correct){
-      resultDivs[i].textContent = "⭕ 正解";
-      resultDivs[i].className = "answer-result correct";
-    }else{
-      resultDivs[i].textContent = "❌ 正解：" + q.choices[correct];
-      resultDivs[i].className = "answer-result wrong";
+  const orderMatters = (q.orderMatters !== false); // 未指定は true扱い
+  const correct = q.answers.slice();
+
+  // 未回答チェック（未回答があるなら、そのまま判定して表示）
+  // ※ここは好みで「未回答があります」と出してreturnでもOK
+
+  if(orderMatters){
+    // 従来通り：位置固定で判定
+    q.answers.forEach((c, i) => {
+      if(selectedAnswers[i] === c){
+        resultDivs[i].textContent = "⭕ 正解";
+        resultDivs[i].className = "answer-result correct";
+      }else{
+        resultDivs[i].textContent = "❌ 正解：" + q.choices[c];
+        resultDivs[i].className = "answer-result wrong";
+      }
+    });
+  }else{
+    // 1) 全体一致（マルチセット一致）チェック
+    const sel = selectedAnswers.slice().filter(v => v !== null).sort((a,b)=>a-b);
+    const cor = correct.slice().sort((a,b)=>a-b);
+    const allAnswered = selectedAnswers.every(v => v !== null);
+
+    const sameLength = sel.length === cor.length;
+    let allMatch = sameLength;
+    if(allMatch){
+      for(let i=0;i<sel.length;i++){
+        if(sel[i] !== cor[i]){
+          allMatch = false;
+          break;
+        }
+      }
     }
-  });
+
+    // 2) 表示：各空欄ごとに「正解集合に存在するか」を残数方式で判定
+    //    (同じ選択肢が複数回正解にある場合も正しく処理)
+    const pool = correct.slice(); // 残っている正解
+    selectedAnswers.forEach((ans, i) => {
+      if(ans === null){
+        resultDivs[i].textContent = "❌ 未選択";
+        resultDivs[i].className = "answer-result wrong";
+        return;
+      }
+      const idx = pool.indexOf(ans);
+      if(idx !== -1){
+        pool.splice(idx, 1);
+        resultDivs[i].textContent = "⭕ 正解（順序不問）";
+        resultDivs[i].className = "answer-result correct";
+      }else{
+        // 不正解時は「残っている正解」を参考表示（1つだけ見せる）
+        const hint = (pool.length > 0) ? (" / 残り候補：" + pool.map(x=>q.choices[x]).join("、")) : "";
+        resultDivs[i].textContent = "❌ 不正解" + hint;
+        resultDivs[i].className = "answer-result wrong";
+      }
+    });
+
+    // 3) 全体メッセージ（任意）：全部答えていて全体一致なら、全て正解の意味になる
+    // （ここではUIを増やさず、各欄表示のみ）
+  }
 
   document.getElementById("answerBtn").classList.add("hidden");
   document.getElementById("explainBtn").classList.remove("hidden");
@@ -267,10 +324,13 @@ function goExplanation(q){
   localStorage.setItem("currentIndex", String(currentIndex));
   localStorage.setItem("returnMode", "back");
 
+  const isLast = currentIndex === filteredQuestions.length - 1;
+
   localStorage.setItem("explanationData", JSON.stringify({
     year: q.year,
     label: q.label || "",
-    explanation: q.explanation || ""
+    explanation: q.explanation || "",
+    isLast: isLast
   }));
 
   location.href = "explanation.html";
