@@ -3,119 +3,400 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>問題追加ツール</title>
+<title>問題追加ツール（ID自動採番）</title>
 
 <style>
-body{font-family:sans-serif;padding:15px;margin:0;font-size:16px;}
-h2{margin-top:0;}
-.card{border:1px solid #ccc;border-radius:10px;padding:12px;margin:12px 0;}
-label{font-weight:bold;display:block;margin-top:12px;}
-input,textarea,select{
-  width:100%;padding:10px;font-size:16px;margin-top:5px;
-  box-sizing:border-box;border-radius:6px;border:1px solid #ccc;
-}
-textarea{min-height:100px;white-space:pre-wrap;}
-button{
-  width:100%;margin-top:12px;padding:12px;font-size:16px;
-  border:none;border-radius:8px;background:#007bff;color:#fff;
-}
-button.gray{background:#6c757d;}
-button.green{background:#8fd19e;color:#000;}
-button.red{background:#dc3545;}
-pre{background:#f4f4f4;padding:10px;white-space:pre-wrap;border-radius:8px;}
-small{color:#555;line-height:1.5;}
-.ok{color:green;font-weight:bold;}
-.ng{color:#c00;font-weight:bold;}
+  body{font-family:sans-serif; margin:0; padding:16px; font-size:16px;}
+  h1{font-size:18px; margin:0 0 12px;}
+  .card{border:1px solid #ccc; border-radius:10px; padding:12px; margin:12px 0;}
+  label{display:block; font-weight:600; margin:10px 0 6px;}
+  input, textarea, select{
+    width:100%; padding:10px; font-size:16px; box-sizing:border-box;
+    border-radius:8px; border:1px solid #bbb;
+  }
+  textarea{min-height:110px; resize:vertical; white-space:pre-wrap;}
+  .row{display:flex; gap:10px;}
+  .row > div{flex:1;}
+  button{
+    width:100%; padding:12px; margin-top:10px; font-size:16px;
+    border:none; border-radius:10px; background:#007bff; color:#fff;
+  }
+  button.secondary{background:#8fd19e; color:#000;}
+  button.gray{background:#6c757d;}
+  button.red{background:#dc3545;}
+  .hint{color:#555; font-size:13px; line-height:1.5;}
+  pre{
+    white-space:pre-wrap; word-break:break-word;
+    background:#f7f7f7; border:1px solid #ddd; padding:10px; border-radius:8px;
+  }
+  .ok{color:green; font-weight:700;}
+  .ng{color:#c00; font-weight:700;}
+  .small{font-size:14px;}
 </style>
 </head>
-
 <body>
 
-<h2>問題追加ツール</h2>
+<h1>問題追加ツール（ID自動採番）</h1>
 
-<div class="card">
-  <button class="gray" onclick="loadQuestions()">questions.json を読み込む</button>
-  <div id="status"></div>
+<div class="hint">
+  目的：ブラウザ上で入力 → 1問追加 → 更新した <b>questions.json</b> をダウンロード。<br>
+  ※GitHub Pagesはサーバー書き込み不可なので「保存」はダウンロード方式です。
 </div>
 
 <div class="card">
-  <h3>🔴 問題削除</h3>
-  <label>削除する番号（1始まり）</label>
-  <input id="deleteIndex" placeholder="例：3">
-  <button class="red" onclick="deleteQuestion()">この番号を削除</button>
+  <label>既存の questions.json を読み込む（おすすめ）</label>
+  <input type="file" id="fileInput" accept=".json,application/json" />
+  <button class="gray" id="loadFromFetchBtn">同じフォルダの questions.json を読み込む</button>
+  <div class="hint small">
+    ・GitHub Pagesで add.html を開く場合：上の「同じフォルダ…」が便利<br>
+    ・ローカルで開く場合：ファイル選択が確実
+  </div>
+  <div id="status" class="small"></div>
 </div>
 
 <div class="card">
-  <h3>📥 更新後 questions.json</h3>
-  <pre id="fullOut">（ここに出ます）</pre>
-  <button class="gray" onclick="copyText()">コピー</button>
-  <button onclick="downloadQuestions()">ダウンロード</button>
+  <h3 style="margin:0 0 8px;">追加（IDは自動で Q001→Q002…）</h3>
+
+  <div class="row">
+    <div>
+      <label>年度</label>
+      <input id="year" placeholder="例：2025" />
+    </div>
+    <div>
+      <label>級</label>
+      <input id="label" placeholder="例：2級" />
+    </div>
+  </div>
+
+  <label>カテゴリ</label>
+  <input id="category" placeholder="例：自動車材料" />
+
+  <div class="row">
+    <div>
+      <label>type</label>
+      <select id="type">
+        <option value="multi_blank">multi_blank（今のアプリ用）</option>
+      </select>
+    </div>
+    <div>
+      <label>順序</label>
+      <select id="order">
+        <option value="false">順序不問（orderMatters:false）</option>
+        <option value="true">順序固定（orderMatters:true）</option>
+      </select>
+    </div>
+  </div>
+
+  <label>問題文</label>
+  <textarea id="question" placeholder="ここに問題文（改行OK）"></textarea>
+
+  <label>画像パス（任意・複数は ; 区切り）</label>
+  <input id="images" placeholder="例：images/2025/2kyu/auto_materials/q013_01.jpg;images/2025/2kyu/auto_materials/q013_02.jpg" />
+
+  <label>選択肢（改行で1つずつ）</label>
+  <textarea id="choices" placeholder="例：ア&#10;イ&#10;ウ&#10;エ"></textarea>
+
+  <label>正解（カンマ区切り）</label>
+  <input id="answers" placeholder="例：エ,キ,ク  または  3,6,7" />
+  <div class="hint small">
+    ・「エ,キ,ク」形式でもOK（choicesから位置を探してインデックス化）<br>
+    ・「3,6,7」形式は0始まりインデックスとして扱います
+  </div>
+
+  <label>解説</label>
+  <textarea id="explanation" placeholder="講師モードの解説（改行OK）"></textarea>
+
+  <button id="buildBtn">1問分のJSONを生成（プレビュー）</button>
+  <button class="secondary" id="appendBtn">既存リストに追加（ID自動採番）</button>
+</div>
+
+<div class="card">
+  <h3 style="margin:0 0 8px;">削除（ID指定）</h3>
+  <label>削除するID</label>
+  <input id="deleteId" placeholder="例：2025-L2-auto_materials-Q002" />
+  <button class="red" id="deleteBtn">このIDを削除</button>
+</div>
+
+<div class="card">
+  <label>生成結果（1問分）</label>
+  <pre id="oneJson">（ここに出ます）</pre>
+  <button class="gray" id="copyOneBtn">↑をコピー</button>
+</div>
+
+<div class="card">
+  <label>更新後の questions.json</label>
+  <pre id="fullJson">（ここに出ます）</pre>
+  <button class="gray" id="copyFullBtn">↑をコピー</button>
+  <button id="downloadBtn">questions.json をダウンロード</button>
 </div>
 
 <script>
-let loaded = null;
+let loadedQuestions = null;
 
-function setStatus(msg){
-  document.getElementById("status").innerHTML = msg;
+function $(id){ return document.getElementById(id); }
+
+function setStatus(html){ $("status").innerHTML = html; }
+
+function parseChoices(){
+  const raw = $("choices").value || "";
+  return raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
 }
 
-async function loadQuestions(){
-  try{
-    const res = await fetch("questions.json",{cache:"no-store"});
-    const json = await res.json();
-    if(!Array.isArray(json)) throw "配列ではありません";
-    loaded = json;
-    setStatus("<span class='ok'>読み込み成功（"+loaded.length+"問）</span>");
-    document.getElementById("fullOut").textContent =
-      JSON.stringify(loaded,null,2);
-  }catch(e){
-    setStatus("<span class='ng'>読み込み失敗</span>");
+function parseImages(){
+  const raw = ($("images").value || "").trim();
+  if(!raw) return [];
+  return raw.split(";").map(s => s.trim()).filter(Boolean);
+}
+
+function tryParseAnswerToken(tok){
+  const t = tok.trim();
+  if(t === "") return null;
+  if(/^\d+$/.test(t)) return Number(t);
+  return t;
+}
+
+function gradeCode(label){
+  // "2級" -> "L2", "1級" -> "L1"
+  const m = String(label || "").match(/(\d+)/);
+  const n = m ? m[1] : "X";
+  return "L" + n;
+}
+
+const categorySlugMap = {
+  "自動車材料": "auto_materials",
+  "樹脂": "resin",
+  "運動特性": "dynamics",
+  "修理技法": "repair",
+  "トラック": "truck"
+};
+
+function hashToBase36(str){
+  // 安定した簡易ハッシュ（外部ライブラリなし）
+  let h = 2166136261;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
   }
+  // unsigned
+  h >>>= 0;
+  return h.toString(36);
 }
 
-function deleteQuestion(){
-  if(!loaded){
-    setStatus("<span class='ng'>先に読み込んでください</span>");
+function categorySlug(category){
+  const c = String(category || "").trim();
+  if(categorySlugMap[c]) return categorySlugMap[c];
+
+  // 英数字が多いカテゴリならそのまま整形
+  const ascii = c.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  if(ascii && ascii !== "_") return ascii;
+
+  // 日本語などはハッシュ
+  return "cat_" + hashToBase36(c);
+}
+
+function nextId(year, label, category){
+  const y = String(year).trim();
+  const L = gradeCode(label);
+  const slug = categorySlug(category);
+  const prefix = `${y}-${L}-${slug}-Q`;
+
+  let maxNum = 0;
+  if(Array.isArray(loadedQuestions)){
+    for(const q of loadedQuestions){
+      if(!q || typeof q !== "object") continue;
+      const id = String(q.id || "");
+      if(!id.startsWith(prefix)) continue;
+      const m = id.match(/-Q(\d+)$/);
+      if(!m) continue;
+      const n = Number(m[1]);
+      if(Number.isFinite(n) && n > maxNum) maxNum = n;
+    }
+  }
+
+  const next = maxNum + 1;
+  const qnum = String(next).padStart(3, "0");
+  return `${prefix}${qnum}`;
+}
+
+function buildOneObject(assignId){
+  const year = ($("year").value || "").trim();
+  const label = ($("label").value || "").trim();
+  const category = ($("category").value || "").trim();
+  const type = $("type").value;
+  const orderMatters = $("order").value === "true";
+  const question = $("question").value || "";
+  const explanation = $("explanation").value || "";
+
+  const choices = parseChoices();
+  const images = parseImages();
+
+  const ansRaw = ($("answers").value || "").split(",").map(s => s.trim()).filter(Boolean);
+  const tokens = ansRaw.map(tryParseAnswerToken).filter(v => v !== null);
+
+  // Convert tokens to indices
+  const indices = [];
+  let ok = true;
+  let err = "";
+
+  for(const t of tokens){
+    if(typeof t === "number"){
+      if(t < 0 || t >= choices.length){
+        ok = false;
+        err = "answersの数字がchoices範囲外です（0〜" + (choices.length-1) + "）";
+        break;
+      }
+      indices.push(t);
+    }else{
+      const idx = choices.indexOf(t);
+      if(idx === -1){
+        ok = false;
+        err = "answersの文字「" + t + "」がchoices内に見つかりません。choicesと同じ文字で入力してください。";
+        break;
+      }
+      indices.push(idx);
+    }
+  }
+
+  if(!year || !label || !category){
+    ok = false;
+    err = err || "年度・級・カテゴリは必須です。";
+  }
+  if(choices.length === 0){
+    ok = false;
+    err = err || "choicesが空です。";
+  }
+  if(indices.length === 0){
+    ok = false;
+    err = err || "answersが空です。";
+  }
+
+  const obj = {
+    year, label, category, type,
+    question,
+    choices,
+    answers: indices,
+    orderMatters,
+    explanation
+  };
+
+  if(assignId){
+    obj.id = nextId(year, label, category);
+  }
+
+  if(images.length > 0) obj.images = images;
+
+  return { ok, err, obj };
+}
+
+function renderOne(res){
+  $("oneJson").textContent = JSON.stringify(res.obj, null, 2);
+  setStatus(res.ok ? "<span class='ok'>OK</span>" : "<span class='ng'>NG</span> " + res.err);
+}
+
+function renderFull(){
+  if(!Array.isArray(loadedQuestions)){
+    $("fullJson").textContent = "（まだ読み込んでいません）";
     return;
   }
-
-  const idx = Number(document.getElementById("deleteIndex").value);
-
-  if(!idx || idx < 1 || idx > loaded.length){
-    setStatus("<span class='ng'>番号が不正です</span>");
-    return;
-  }
-
-  loaded.splice(idx-1,1);
-
-  setStatus("<span class='ok'>削除しました（現在 "+loaded.length+"問）</span>");
-  document.getElementById("fullOut").textContent =
-    JSON.stringify(loaded,null,2);
+  $("fullJson").textContent = JSON.stringify(loadedQuestions, null, 2);
 }
 
-async function copyText(){
-  await navigator.clipboard.writeText(
-    document.getElementById("fullOut").textContent
-  );
-  setStatus("<span class='ok'>コピーしました</span>");
-}
+// --- Buttons ---
+$("buildBtn").onclick = () => {
+  const res = buildOneObject(false); // プレビューはID無し（追加時に採番）
+  renderOne(res);
+};
 
-function downloadQuestions(){
-  if(!loaded){
-    setStatus("<span class='ng'>先に読み込んでください</span>");
+$("appendBtn").onclick = () => {
+  if(!Array.isArray(loadedQuestions)){
+    setStatus("<span class='ng'>NG</span> 先にquestions.jsonを読み込んでください。");
     return;
   }
-  const blob = new Blob(
-    [JSON.stringify(loaded,null,2)],
-    {type:"application/json"}
-  );
+  const res = buildOneObject(true); // 追加時にID採番
+  renderOne(res);
+  if(!res.ok) return;
+
+  loadedQuestions.push(res.obj);
+  setStatus("<span class='ok'>追加しました</span>（現在 " + loadedQuestions.length + "問 / 追加ID: " + res.obj.id + "）");
+  renderFull();
+};
+
+$("deleteBtn").onclick = () => {
+  if(!Array.isArray(loadedQuestions)){
+    setStatus("<span class='ng'>NG</span> 先にquestions.jsonを読み込んでください。");
+    return;
+  }
+  const id = ($("deleteId").value || "").trim();
+  if(!id){
+    setStatus("<span class='ng'>NG</span> IDを入力してください。");
+    return;
+  }
+  const before = loadedQuestions.length;
+  loadedQuestions = loadedQuestions.filter(q => String(q.id || "") !== id);
+  if(loadedQuestions.length === before){
+    setStatus("<span class='ng'>NG</span> そのIDは見つかりませんでした。");
+  }else{
+    setStatus("<span class='ok'>削除しました</span>（現在 " + loadedQuestions.length + "問）");
+    renderFull();
+  }
+};
+
+$("copyOneBtn").onclick = async () => {
+  await navigator.clipboard.writeText($("oneJson").textContent);
+  setStatus("<span class='ok'>1問JSONをコピーしました</span>");
+};
+
+$("copyFullBtn").onclick = async () => {
+  await navigator.clipboard.writeText($("fullJson").textContent);
+  setStatus("<span class='ok'>全文JSONをコピーしました</span>");
+};
+
+$("downloadBtn").onclick = () => {
+  if(!Array.isArray(loadedQuestions)){
+    setStatus("<span class='ng'>NG</span> 先にquestions.jsonを読み込んでください。");
+    return;
+  }
+  const blob = new Blob([JSON.stringify(loadedQuestions, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = "questions.json";
   a.click();
   URL.revokeObjectURL(url);
-}
+  setStatus("<span class='ok'>ダウンロードしました</span>");
+};
+
+// --- Loading ---
+$("fileInput").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const json = JSON.parse(text);
+    if(!Array.isArray(json)) throw new Error("JSONが配列ではありません。");
+    loadedQuestions = json;
+    setStatus("<span class='ok'>読み込みOK</span>（" + loadedQuestions.length + "問）");
+    renderFull();
+  }catch(err){
+    setStatus("<span class='ng'>読み込み失敗</span> " + err.message);
+  }
+});
+
+$("loadFromFetchBtn").onclick = async () => {
+  try{
+    const res = await fetch("questions.json", {cache:"no-store"});
+    if(!res.ok) throw new Error("fetch失敗: " + res.status);
+    const json = await res.json();
+    if(!Array.isArray(json)) throw new Error("questions.jsonが配列ではありません。");
+    loadedQuestions = json;
+    setStatus("<span class='ok'>読み込みOK</span>（" + loadedQuestions.length + "問）");
+    renderFull();
+  }catch(err){
+    setStatus("<span class='ng'>読み込み失敗</span> " + err.message + "（ローカル直開きの場合はファイル選択を使ってください）");
+  }
+};
+
+renderFull();
 </script>
 
 </body>
