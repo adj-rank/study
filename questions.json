@@ -78,7 +78,7 @@
       2,
       4
     ],
-    "orderMatters": true,
+    "orderMatters": false,
     "explanation": "解説なし"
   },
   {
@@ -103,7 +103,7 @@
       4,
       7
     ],
-    "orderMatters": true,
+    "orderMatters": false,
     "explanation": "解説なし"
   },
   {
@@ -127,7 +127,7 @@
       4,
       7
     ],
-    "orderMatters": true,
+    "orderMatters": false,
     "explanation": "解説なし"
   }
 ]
