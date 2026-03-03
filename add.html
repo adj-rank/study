@@ -10,11 +10,18 @@ body{font-family:sans-serif;padding:15px;margin:0;font-size:16px;}
 h2{margin-top:0;}
 .card{border:1px solid #ccc;border-radius:10px;padding:12px;margin:12px 0;}
 label{font-weight:bold;display:block;margin-top:12px;}
-input,textarea,select{width:100%;padding:10px;font-size:16px;margin-top:5px;box-sizing:border-box;border-radius:6px;border:1px solid #ccc;}
+input,textarea,select{
+  width:100%;padding:10px;font-size:16px;margin-top:5px;
+  box-sizing:border-box;border-radius:6px;border:1px solid #ccc;
+}
 textarea{min-height:100px;white-space:pre-wrap;}
-button{width:100%;margin-top:12px;padding:12px;font-size:16px;border:none;border-radius:8px;background:#007bff;color:#fff;}
+button{
+  width:100%;margin-top:12px;padding:12px;font-size:16px;
+  border:none;border-radius:8px;background:#007bff;color:#fff;
+}
 button.gray{background:#6c757d;}
 button.green{background:#8fd19e;color:#000;}
+button.red{background:#dc3545;}
 pre{background:#f4f4f4;padding:10px;white-space:pre-wrap;border-radius:8px;}
 small{color:#555;line-height:1.5;}
 .ok{color:green;font-weight:bold;}
@@ -27,165 +34,87 @@ small{color:#555;line-height:1.5;}
 <h2>問題追加ツール</h2>
 
 <div class="card">
-  <label>既存 questions.json を読み込む（おすすめ）</label>
-  <button class="gray" onclick="loadQuestions()">同じフォルダの questions.json を読み込む</button>
-  <small>※GitHub Pagesで開いている場合はこれでOK</small>
+  <button class="gray" onclick="loadQuestions()">questions.json を読み込む</button>
   <div id="status"></div>
 </div>
 
 <div class="card">
-  <label>年度</label>
-  <input id="year" placeholder="例：2025">
-
-  <label>級</label>
-  <input id="label" placeholder="例：2級">
-
-  <label>カテゴリ</label>
-  <input id="category" placeholder="例：自動車材料">
-
-  <label>順序</label>
-  <select id="order">
-    <option value="false">順序不問</option>
-    <option value="true">順序固定</option>
-  </select>
-
-  <label>問題文</label>
-  <textarea id="question"></textarea>
-
-  <label>画像パス（複数は ; 区切り）</label>
-  <input id="images" placeholder="images/2025/2kyu/auto/q013_01.jpg;images/2025/2kyu/auto/q013_02.jpg">
-
-  <label>選択肢（1行ずつ）</label>
-  <textarea id="choices" placeholder="ア&#10;イ&#10;ウ&#10;エ"></textarea>
-
-  <label>正解（例：エ,キ,ク または 3,6,7）</label>
-  <input id="answers">
-
-  <label>解説</label>
-  <textarea id="explanation"></textarea>
-
-  <button onclick="buildOne()">1問JSON生成</button>
-  <button class="green" onclick="appendOne()">questions.json に追加</button>
+  <h3>🔴 問題削除</h3>
+  <label>削除する番号（1始まり）</label>
+  <input id="deleteIndex" placeholder="例：3">
+  <button class="red" onclick="deleteQuestion()">この番号を削除</button>
 </div>
 
 <div class="card">
-  <h3>1問分JSON</h3>
-  <pre id="oneOut">（ここに出ます）</pre>
-  <button class="gray" onclick="copyText('oneOut')">コピー</button>
-</div>
-
-<div class="card">
-  <h3>更新後 questions.json</h3>
+  <h3>📥 更新後 questions.json</h3>
   <pre id="fullOut">（ここに出ます）</pre>
-  <button class="gray" onclick="copyText('fullOut')">コピー</button>
-  <button onclick="downloadQuestions()">questions.json をダウンロード</button>
+  <button class="gray" onclick="copyText()">コピー</button>
+  <button onclick="downloadQuestions()">ダウンロード</button>
 </div>
 
 <script>
 let loaded = null;
 
-function setStatus(html){
-  document.getElementById("status").innerHTML = html;
+function setStatus(msg){
+  document.getElementById("status").innerHTML = msg;
 }
 
 async function loadQuestions(){
   try{
-    const res = await fetch("questions.json", {cache:"no-store"});
-    if(!res.ok) throw new Error("fetch失敗: " + res.status);
+    const res = await fetch("questions.json",{cache:"no-store"});
     const json = await res.json();
-    if(!Array.isArray(json)) throw new Error("配列ではありません");
+    if(!Array.isArray(json)) throw "配列ではありません";
     loaded = json;
-    setStatus("<span class='ok'>読み込みOK</span>（" + loaded.length + "問）");
-    document.getElementById("fullOut").textContent = JSON.stringify(loaded, null, 2);
+    setStatus("<span class='ok'>読み込み成功（"+loaded.length+"問）</span>");
+    document.getElementById("fullOut").textContent =
+      JSON.stringify(loaded,null,2);
   }catch(e){
-    setStatus("<span class='ng'>読み込み失敗</span> " + e.message);
+    setStatus("<span class='ng'>読み込み失敗</span>");
   }
 }
 
-function parseChoices(){
-  return document.getElementById("choices").value
-    .split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-}
-
-function parseImages(){
-  const raw = document.getElementById("images").value.trim();
-  if(!raw) return [];
-  return raw.split(";").map(s=>s.trim()).filter(Boolean);
-}
-
-function buildOneObject(){
-  const year = document.getElementById("year").value.trim();
-  const label = document.getElementById("label").value.trim();
-  const category = document.getElementById("category").value.trim();
-  const orderMatters = document.getElementById("order").value === "true";
-  const question = document.getElementById("question").value;
-  const explanation = document.getElementById("explanation").value;
-
-  const choices = parseChoices();
-  const images = parseImages();
-
-  const tokens = document.getElementById("answers").value
-    .split(",").map(s=>s.trim()).filter(Boolean);
-
-  const indices = [];
-  tokens.forEach(t=>{
-    if(/^\d+$/.test(t)){
-      indices.push(Number(t));
-    }else{
-      const idx = choices.indexOf(t);
-      if(idx !== -1) indices.push(idx);
-    }
-  });
-
-  const obj = {
-    year, label, category,
-    type:"multi_blank",
-    question,
-    choices,
-    answers:indices,
-    orderMatters,
-    explanation
-  };
-  if(images.length>0) obj.images = images;
-
-  return obj;
-}
-
-function buildOne(){
-  const obj = buildOneObject();
-  document.getElementById("oneOut").textContent = JSON.stringify(obj, null, 2);
-}
-
-function appendOne(){
-  if(!Array.isArray(loaded)){
-    setStatus("<span class='ng'>先に questions.json を読み込んでください</span>");
+function deleteQuestion(){
+  if(!loaded){
+    setStatus("<span class='ng'>先に読み込んでください</span>");
     return;
   }
-  const obj = buildOneObject();
-  loaded.push(obj);
-  setStatus("<span class='ok'>追加しました</span>（" + loaded.length + "問）");
-  document.getElementById("oneOut").textContent = JSON.stringify(obj, null, 2);
-  document.getElementById("fullOut").textContent = JSON.stringify(loaded, null, 2);
+
+  const idx = Number(document.getElementById("deleteIndex").value);
+
+  if(!idx || idx < 1 || idx > loaded.length){
+    setStatus("<span class='ng'>番号が不正です</span>");
+    return;
+  }
+
+  loaded.splice(idx-1,1);
+
+  setStatus("<span class='ok'>削除しました（現在 "+loaded.length+"問）</span>");
+  document.getElementById("fullOut").textContent =
+    JSON.stringify(loaded,null,2);
 }
 
-async function copyText(id){
-  await navigator.clipboard.writeText(document.getElementById(id).textContent);
+async function copyText(){
+  await navigator.clipboard.writeText(
+    document.getElementById("fullOut").textContent
+  );
   setStatus("<span class='ok'>コピーしました</span>");
 }
 
 function downloadQuestions(){
-  if(!Array.isArray(loaded)){
-    setStatus("<span class='ng'>先に questions.json を読み込んでください</span>");
+  if(!loaded){
+    setStatus("<span class='ng'>先に読み込んでください</span>");
     return;
   }
-  const blob = new Blob([JSON.stringify(loaded, null, 2)], {type:"application/json"});
+  const blob = new Blob(
+    [JSON.stringify(loaded,null,2)],
+    {type:"application/json"}
+  );
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = "questions.json";
   a.click();
   URL.revokeObjectURL(url);
-  setStatus("<span class='ok'>ダウンロードしました</span>");
 }
 </script>
 
