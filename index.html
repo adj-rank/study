@@ -191,12 +191,8 @@ function showQuestion(){
   document.getElementById("titleArea").textContent =
     q.year + "年度" + (q.label ? " " + q.label : "");
 
-  const note = (q.orderMatters === false)
-    ? "\n\n※この問題は順序不問です"
-    : "";
-
   document.getElementById("questionArea").textContent =
-    normalizeText(q.question) + note;
+    normalizeText(q.question);
 
   const answersDiv = document.getElementById("answersArea");
   answersDiv.innerHTML = "";
@@ -268,7 +264,7 @@ function checkAnswer(q){
 
   }else{
 
-    let remaining = q.answers.slice(); // 未消化の正解
+    let remaining = q.answers.slice();
 
     selectedAnswers.forEach((ans, i) => {
 
