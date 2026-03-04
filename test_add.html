@@ -1,50 +1,18 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>テスト追加画面</title>
-<style>
-body{font-family:"MS Mincho",serif;padding:15px;}
-textarea{width:100%;height:80px;}
-input{width:100%;}
-button{margin-top:10px;padding:6px 10px;}
-</style>
-</head>
-<body>
-
-<h2>テスト問題追加</h2>
-
-年度<input id="year">
-カテゴリ<input id="category">
-問題<textarea id="question"></textarea>
-選択肢(カンマ区切り)<input id="choices">
-正解番号(カンマ区切り)<input id="answers">
-順序固定？<input type="checkbox" id="order">
-
-<button onclick="generate()">JSON生成</button>
-
-<pre id="output"></pre>
-
-<script>
-function generate(){
-  const obj={
-    id: Date.now(),
-    year: document.getElementById("year").value,
-    label: "2級",
-    category: document.getElementById("category").value,
-    type: "multi_blank",
-    question: document.getElementById("question").value,
-    choices: document.getElementById("choices").value.split(","),
-    answers: document.getElementById("answers").value
-              .split(",").map(Number),
-    orderMatters: document.getElementById("order").checked,
-    explanation: ""
-  };
-
-  document.getElementById("output").innerText=
-    JSON.stringify(obj,null,2);
+{
+  "year": "2024",
+  "label": "2級",
+  "category": "運動特性",
+  "type": "multi_blank",
+  "question": "つぎの文の中から最も適切なものを２つ選び、その記号を答えなさい。",
+  "choices": [
+    "ア　走行中の自動車の出力（軸出力）が一定であれば、当該自動車を駆動させるために必要なトルク（軸トルク）の大きさは、当該自動車のタイヤの有効半径とギヤの総減速比に比例し、走行速度に反比例する。",
+    "イ　一定の速度で定常円旋回走行中の自動車の後輪サスペンションのロール剛性配分を相対的に前輪よりも小さくすると、後輪の方が前輪に比べ旋回内側から外側への荷重移動量が増大し、車体にはオーバステア方向の挙動が発生しやすくなる。",
+    "ウ　平坦路を定常円旋回走行中の自動車の速度は、角速度に旋回円半径を乗じた値で表される。",
+    "エ　平坦路を旋回走行中の自動車に作用するセルフアライニングトルクは、コーナリングフォースが確保できれば、車両質量に比例する。",
+    "オ　直進走行中の自動車の制動時の後輪荷重反力の減少分は、減速度が同じであれば車両質量と重心高さに比例し、ホイールベースに反比例する。",
+    "カ　自動車が固定壁に正面衝突した場合、衝突時間が一定であれば衝撃加速度は車両質量に比例する。"
+  ],
+  "answers": [3,4],
+  "orderMatters": false,
+  "explanation": "【正解】エ・オ\n\n【講師解説】\nいいか、この問題は運動特性の基本式を理解しているかを見る典型問題だ。\n\nまずエ。\nセルフアライニングトルクはタイヤが発生する復元モーメントであり、ニューマチックトレールとコーナリングフォースによって生じる。\nコーナリングフォースが確保されれば、車両質量が大きいほど荷重が増え、その結果モーメントも大きくなるため成立する。\n\n次にオ。\n制動時の荷重移動は\n\n荷重移動量 = (車両質量 × 重心高さ × 減速度) / ホイールベース\n\nで決まる。\nつまり\n\n・質量に比例\n・重心高さに比例\n・ホイールベースに反比例\n\nという関係になる。\n\nこの式を覚えていれば即答できる問題だ。\n\n【他の選択肢】\nア：出力一定ならトルクは速度に反比例ではなく、回転数との関係で決まるため誤り。\n\nイ：後輪ロール剛性を小さくすると後輪荷重移動は減り、アンダーステア傾向になるため誤り。\n\nウ：これは速度の定義だが問題文の意図と一致していないため不適切。\n\nカ：衝撃加速度は質量ではなく速度変化量と衝突時間で決まるため誤り。"
 }
-</script>
-
-</body>
-</html>
