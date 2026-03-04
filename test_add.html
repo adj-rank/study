@@ -1,18 +1,717 @@
-{
-  "year": "2024",
-  "label": "2級",
-  "category": "運動特性",
-  "type": "multi_blank",
-  "question": "つぎの文の中から最も適切なものを２つ選び、その記号を答えなさい。",
-  "choices": [
-    "ア　走行中の自動車の出力（軸出力）が一定であれば、当該自動車を駆動させるために必要なトルク（軸トルク）の大きさは、当該自動車のタイヤの有効半径とギヤの総減速比に比例し、走行速度に反比例する。",
-    "イ　一定の速度で定常円旋回走行中の自動車の後輪サスペンションのロール剛性配分を相対的に前輪よりも小さくすると、後輪の方が前輪に比べ旋回内側から外側への荷重移動量が増大し、車体にはオーバステア方向の挙動が発生しやすくなる。",
-    "ウ　平坦路を定常円旋回走行中の自動車の速度は、角速度に旋回円半径を乗じた値で表される。",
-    "エ　平坦路を旋回走行中の自動車に作用するセルフアライニングトルクは、コーナリングフォースが確保できれば、車両質量に比例する。",
-    "オ　直進走行中の自動車の制動時の後輪荷重反力の減少分は、減速度が同じであれば車両質量と重心高さに比例し、ホイールベースに反比例する。",
-    "カ　自動車が固定壁に正面衝突した場合、衝突時間が一定であれば衝撃加速度は車両質量に比例する。"
-  ],
-  "answers": [3,4],
-  "orderMatters": false,
-  "explanation": "【正解】エ・オ\n\n【講師解説】\nいいか、この問題は運動特性の基本式を理解しているかを見る典型問題だ。\n\nまずエ。\nセルフアライニングトルクはタイヤが発生する復元モーメントであり、ニューマチックトレールとコーナリングフォースによって生じる。\nコーナリングフォースが確保されれば、車両質量が大きいほど荷重が増え、その結果モーメントも大きくなるため成立する。\n\n次にオ。\n制動時の荷重移動は\n\n荷重移動量 = (車両質量 × 重心高さ × 減速度) / ホイールベース\n\nで決まる。\nつまり\n\n・質量に比例\n・重心高さに比例\n・ホイールベースに反比例\n\nという関係になる。\n\nこの式を覚えていれば即答できる問題だ。\n\n【他の選択肢】\nア：出力一定ならトルクは速度に反比例ではなく、回転数との関係で決まるため誤り。\n\nイ：後輪ロール剛性を小さくすると後輪荷重移動は減り、アンダーステア傾向になるため誤り。\n\nウ：これは速度の定義だが問題文の意図と一致していないため不適切。\n\nカ：衝撃加速度は質量ではなく速度変化量と衝突時間で決まるため誤り。"
-}
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>最強版 問題追加ツール</title>
+  <style>
+    :root{
+      --bg:#0b1020; --card:#121a33; --muted:#a9b4d0; --text:#eaf0ff;
+      --line:#26335e; --btn:#3b82f6; --btn2:#22c55e; --danger:#ef4444; --warn:#f59e0b;
+      --input:#0f1730;
+    }
+    body{
+      margin:0; background:linear-gradient(180deg,#0b1020,#070a14);
+      color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;
+    }
+    header{
+      padding:18px 14px; border-bottom:1px solid var(--line);
+      position:sticky; top:0; background:rgba(11,16,32,.92); backdrop-filter: blur(10px);
+      z-index:10;
+    }
+    h1{margin:0; font-size:18px;}
+    .wrap{max-width:1100px; margin:0 auto; padding:14px;}
+    .grid{display:grid; grid-template-columns:1fr; gap:12px;}
+    @media(min-width:980px){ .grid{grid-template-columns: 1.1fr .9fr;} }
+
+    .card{
+      background:rgba(18,26,51,.92);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      box-shadow:0 12px 30px rgba(0,0,0,.25);
+    }
+    .card h2{margin:0 0 10px; font-size:16px;}
+    .row{display:grid; grid-template-columns:1fr; gap:10px;}
+    @media(min-width:720px){ .row.two{grid-template-columns:1fr 1fr;} .row.three{grid-template-columns:1fr 1fr 1fr;} }
+
+    label{display:block; font-size:12px; color:var(--muted); margin:2px 0 6px;}
+    input,select,textarea{
+      width:100%;
+      background:var(--input);
+      border:1px solid var(--line);
+      color:var(--text);
+      border-radius:10px;
+      padding:10px 10px;
+      font-size:14px;
+      box-sizing:border-box;
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical; white-space:pre-wrap;}
+    .mini{min-height:80px;}
+    .btnbar{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+    button{
+      border:0; border-radius:10px;
+      padding:10px 12px;
+      font-weight:700; cursor:pointer;
+      color:white;
+      background:var(--btn);
+    }
+    button.secondary{background:#334155;}
+    button.good{background:var(--btn2);}
+    button.warn{background:var(--warn); color:#111827;}
+    button.danger{background:var(--danger);}
+    button:disabled{opacity:.5; cursor:not-allowed;}
+    .hint{font-size:12px; color:var(--muted); line-height:1.6;}
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:12px; color:var(--muted);
+      border:1px solid var(--line); padding:6px 10px; border-radius:999px;
+      background:rgba(15,23,48,.6);
+    }
+
+    .listTop{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .listControls{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+    .table{
+      width:100%;
+      border-collapse:separate; border-spacing:0;
+      overflow:hidden;
+      border-radius:12px;
+      border:1px solid var(--line);
+    }
+    .table th,.table td{
+      padding:10px;
+      border-bottom:1px solid var(--line);
+      font-size:13px;
+      vertical-align:top;
+    }
+    .table th{color:var(--muted); background:rgba(15,23,48,.7); text-align:left;}
+    .table tr:last-child td{border-bottom:0;}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
+    .small{font-size:12px; color:var(--muted);}
+    .right{display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;}
+    .nowrap{white-space:nowrap;}
+    .pre{
+      background:#0a0f22;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      white-space:pre;
+      max-height:340px;
+      font-size:12px;
+    }
+    .ok{color:#86efac}
+    .ng{color:#fca5a5}
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+    <h1>最強版 問題追加ツール（add.html）</h1>
+    <span class="pill">GitHub Pages対応：読み込み→編集→questions.jsonをダウンロード</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- LEFT: Editor -->
+    <div class="card">
+      <h2>① 読み込み / 保存（questions.json）</h2>
+
+      <div class="row two">
+        <div>
+          <label>questions.json を自動で読み込む（同じフォルダにある前提）</label>
+          <button class="secondary" id="btnLoad">questions.json を読み込む</button>
+          <div class="hint">※ GitHub Pagesで公開されている study/ 配下の questions.json を fetch します。</div>
+        </div>
+        <div>
+          <label>手元の questions.json を読み込む（ファイル選択）</label>
+          <input type="file" id="fileImport" accept=".json,application/json" />
+          <div class="hint">※ ローカル編集したJSONも読み込めます。</div>
+        </div>
+      </div>
+
+      <div class="btnbar">
+        <button class="good" id="btnDownload">更新した questions.json をダウンロード</button>
+        <button class="warn" id="btnValidate">整合性チェック</button>
+        <button class="secondary" id="btnBackup">このブラウザに一時保存（localStorage）</button>
+        <button class="secondary" id="btnRestore">一時保存を復元</button>
+        <button class="danger" id="btnClear">データ初期化（読み込み前に戻す）</button>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        ✅ 使い方：<b>読み込み</b> → 追加/編集/削除 → <b>ダウンロード</b> → GitHubで questions.json を差し替えてコミット。<br>
+        ※ 静的サイトのため、add.html からサーバへ直接保存はできません（安全で確実な方式です）。
+      </div>
+    </div>
+
+    <!-- RIGHT: Status -->
+    <div class="card">
+      <h2>ステータス</h2>
+      <div class="row">
+        <div class="pill"><span>読み込み件数：</span><b id="statCount">0</b></div>
+        <div class="pill"><span>最後の変更：</span><b id="statDirty">未変更</b></div>
+        <div class="pill"><span>ID方式：</span><b id="statId">自動付与</b></div>
+      </div>
+      <div style="margin-top:10px;" class="pre mono" id="log"></div>
+    </div>
+
+    <!-- LEFT: Form -->
+    <div class="card">
+      <h2>② 追加 / 編集フォーム</h2>
+
+      <div class="row three">
+        <div>
+          <label>ID（自動。編集時のみ表示）</label>
+          <input id="f_id" placeholder="例：q_2024_0001" disabled />
+          <div class="small">※ 追加時は自動採番</div>
+        </div>
+        <div>
+          <label>年度</label>
+          <input id="f_year" placeholder="例：2024" />
+        </div>
+        <div>
+          <label>級</label>
+          <input id="f_label" placeholder="例：2級" />
+        </div>
+      </div>
+
+      <div class="row three">
+        <div>
+          <label>カテゴリ</label>
+          <input id="f_category" placeholder="例：運動特性 / 自動車材料 / 法規 ..." />
+        </div>
+        <div>
+          <label>出題形式</label>
+          <select id="f_type">
+            <option value="multi_blank">multi_blank（選択肢から選ぶ）</option>
+            <option value="single">single（1つ選ぶ）</option>
+            <option value="multiple">multiple（複数選ぶ）</option>
+          </select>
+          <div class="small">※ 既存仕様が multi_blank の場合はそのままでOK</div>
+        </div>
+        <div>
+          <label>順序</label>
+          <select id="f_orderMatters">
+            <option value="false">順序不問（orderMatters:false）</option>
+            <option value="true">順序固定（orderMatters:true）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>問題文（改行OK）</label>
+          <textarea id="f_question" placeholder="問題文をそのまま貼る"></textarea>
+        </div>
+      </div>
+
+      <div class="row two">
+        <div>
+          <label>選択肢（1行=1項目）</label>
+          <textarea id="f_choices" class="mini" placeholder="例：&#10;ア&#10;イ&#10;ウ&#10;エ&#10;オ&#10;カ"></textarea>
+          <div class="small">※ choices は配列化されます</div>
+        </div>
+        <div>
+          <label>正解（indexで指定・カンマ区切り）</label>
+          <input id="f_answers" placeholder="例：3,4" />
+          <div class="small">※ choicesの0始まり index。例：エ=3、オ=4</div>
+
+          <div style="margin-top:10px;">
+            <label style="margin-bottom:6px;">画像パス（任意：images/xxx.jpg 等）</label>
+            <input id="f_image" placeholder="例：images/2024_q4.jpg（任意）" />
+            <div class="small">※ 表示対応をするなら questions.json に image を持たせるのが便利</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>解説（講師モードOK）</label>
+          <textarea id="f_explanation" placeholder="【正解】...&#10;&#10;【根拠】...&#10;&#10;【解説】..."></textarea>
+        </div>
+      </div>
+
+      <div class="btnbar">
+        <button class="good" id="btnAdd">追加（新規）</button>
+        <button class="warn" id="btnUpdate" disabled>更新（編集反映）</button>
+        <button class="secondary" id="btnResetForm">フォームクリア</button>
+        <button class="danger" id="btnDelete" disabled>このIDを削除</button>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        ✅ 追加→一覧に反映。編集したいときは下の一覧で「編集」を押す。<br>
+        ✅ 「正解」は <b>choicesのindex（0開始）</b> で入力（例：エ=3）。<br>
+      </div>
+    </div>
+
+    <!-- RIGHT: List -->
+    <div class="card">
+      <div class="listTop">
+        <h2 style="margin:0;">③ 問題一覧（検索/編集/削除）</h2>
+        <div class="listControls">
+          <input id="q_search" placeholder="検索：年度/カテゴリ/本文/解説など" style="min-width:240px;" />
+          <select id="q_sort">
+            <option value="newest">並び：新しい順</option>
+            <option value="oldest">並び：古い順</option>
+            <option value="yearAsc">年度：昇順</option>
+            <option value="yearDesc">年度：降順</option>
+            <option value="category">カテゴリ順</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="right" style="margin-bottom:10px;">
+        <button class="secondary" id="btnNormalize">ID付与＆正規化</button>
+        <button class="secondary" id="btnExportOne">選択中をJSON表示</button>
+      </div>
+
+      <div style="overflow:auto; max-height:520px;">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th class="nowrap">年度</th>
+              <th class="nowrap">級</th>
+              <th>カテゴリ</th>
+              <th>ID</th>
+              <th class="nowrap">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="small">プレビュー（選択中）</div>
+        <div class="pre mono" id="preview">(未選択)</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(() => {
+  const logEl = document.getElementById('log');
+  const statCount = document.getElementById('statCount');
+  const statDirty = document.getElementById('statDirty');
+  const previewEl = document.getElementById('preview');
+
+  const $ = (id) => document.getElementById(id);
+
+  let original = null;
+  let data = [];
+  let selectedId = null;
+  let dirty = false;
+
+  function log(msg, type="info"){
+    const t = new Date().toLocaleString();
+    const cls = type==="ok" ? "ok" : type==="ng" ? "ng" : "";
+    logEl.innerHTML = `<div class="${cls}">[${t}] ${escapeHtml(msg)}</div>` + logEl.innerHTML;
+  }
+
+  function setDirty(v){
+    dirty = v;
+    statDirty.textContent = v ? "変更あり" : "未変更";
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function safeJsonParse(text){
+    try { return {ok:true, json: JSON.parse(text)}; }
+    catch(e){ return {ok:false, err: e}; }
+  }
+
+  // --- ID generation ---
+  function makeId(obj){
+    const y = String(obj.year ?? "0000").replace(/\D/g,"") || "0000";
+    // simple running number per year
+    const sameYear = data.filter(q => String(q.year ?? "").replace(/\D/g,"") === y);
+    const max = sameYear.reduce((m,q) => {
+      const id = String(q.id ?? "");
+      const m2 = id.match(/_(\d{4})$/);
+      if(!m2) return m;
+      return Math.max(m, parseInt(m2[1],10));
+    }, 0);
+    const n = String(max+1).padStart(4,"0");
+    return `q_${y}_${n}`;
+  }
+
+  function normalizeOne(q){
+    const nq = {...q};
+
+    // ensure keys
+    if(nq.type == null) nq.type = "multi_blank";
+    if(nq.choices == null) nq.choices = [];
+    if(nq.answers == null) nq.answers = [];
+    if(typeof nq.orderMatters !== "boolean") nq.orderMatters = false; // default:順序不問寄り
+
+    // allow optional image field
+    // if present but empty => delete
+    if(typeof nq.image === "string" && nq.image.trim()==="") delete nq.image;
+
+    // ensure id
+    if(!nq.id || String(nq.id).trim()===""){
+      nq.id = makeId(nq);
+    }
+    return nq;
+  }
+
+  function normalizeAll(){
+    // to keep ID stable, first pass collect existing ids
+    data = data.map(q => normalizeOne(q));
+    setDirty(true);
+    renderList();
+    log("ID付与＆正規化を実行しました。", "ok");
+  }
+
+  // --- Render list ---
+  function getFiltered(){
+    const term = $('q_search').value.trim().toLowerCase();
+    let arr = [...data];
+
+    // sort
+    const sort = $('q_sort').value;
+    if(sort==="newest") arr.reverse();
+    if(sort==="oldest") {/* keep */}
+    if(sort==="yearAsc") arr.sort((a,b)=>String(a.year).localeCompare(String(b.year)));
+    if(sort==="yearDesc") arr.sort((a,b)=>String(b.year).localeCompare(String(a.year)));
+    if(sort==="category") arr.sort((a,b)=>String(a.category).localeCompare(String(b.category)));
+
+    if(!term) return arr;
+
+    return arr.filter(q=>{
+      const blob = [
+        q.id, q.year, q.label, q.category, q.type,
+        q.question, (q.choices||[]).join("\n"),
+        (q.answers||[]).join(","),
+        q.explanation, q.image
+      ].join(" ").toLowerCase();
+      return blob.includes(term);
+    });
+  }
+
+  function renderList(){
+    statCount.textContent = String(data.length);
+
+    const tbody = $('tbody');
+    tbody.innerHTML = "";
+
+    const arr = getFiltered();
+    for(const q of arr){
+      const tr = document.createElement('tr');
+
+      const tdY = document.createElement('td'); tdY.textContent = q.year ?? "";
+      const tdL = document.createElement('td'); tdL.textContent = q.label ?? "";
+      const tdC = document.createElement('td'); tdC.textContent = q.category ?? "";
+      const tdI = document.createElement('td'); tdI.textContent = q.id ?? "";
+      tdI.className="mono";
+      const tdA = document.createElement('td');
+
+      const btnEdit = document.createElement('button');
+      btnEdit.textContent = "編集";
+      btnEdit.className="secondary";
+      btnEdit.style.padding="8px 10px";
+      btnEdit.onclick = ()=>selectForEdit(q.id);
+
+      const btnDel = document.createElement('button');
+      btnDel.textContent = "削除";
+      btnDel.className="danger";
+      btnDel.style.padding="8px 10px";
+      btnDel.onclick = ()=>deleteById(q.id);
+
+      tdA.appendChild(btnEdit);
+      tdA.appendChild(document.createTextNode(" "));
+      tdA.appendChild(btnDel);
+
+      tr.appendChild(tdY); tr.appendChild(tdL); tr.appendChild(tdC); tr.appendChild(tdI); tr.appendChild(tdA);
+      tbody.appendChild(tr);
+    }
+
+    // refresh preview
+    if(selectedId){
+      const q = data.find(x=>x.id===selectedId);
+      previewEl.textContent = q ? JSON.stringify(q,null,2) : "(未選択)";
+    }else{
+      previewEl.textContent="(未選択)";
+    }
+  }
+
+  // --- Form helpers ---
+  function formToObject(){
+    const year = $('f_year').value.trim();
+    const label = $('f_label').value.trim();
+    const category = $('f_category').value.trim();
+    const type = $('f_type').value;
+    const orderMatters = $('f_orderMatters').value === "true";
+    const question = $('f_question').value;
+    const explanation = $('f_explanation').value;
+
+    const choices = $('f_choices').value
+      .split("\n").map(s=>s.trim()).filter(s=>s!=="");
+
+    const answers = $('f_answers').value
+      .split(",").map(s=>s.trim()).filter(s=>s!=="")
+      .map(s=>Number(s)).filter(n=>Number.isFinite(n));
+
+    const image = $('f_image').value.trim();
+
+    const obj = {
+      year, label, category, type,
+      question, choices, answers,
+      orderMatters,
+      explanation
+    };
+    if(image) obj.image = image;
+
+    return obj;
+  }
+
+  function objectToForm(q){
+    $('f_id').value = q.id ?? "";
+    $('f_year').value = q.year ?? "";
+    $('f_label').value = q.label ?? "";
+    $('f_category').value = q.category ?? "";
+    $('f_type').value = q.type ?? "multi_blank";
+    $('f_orderMatters').value = String(!!q.orderMatters);
+    $('f_question').value = q.question ?? "";
+    $('f_choices').value = (q.choices ?? []).join("\n");
+    $('f_answers').value = (q.answers ?? []).join(",");
+    $('f_explanation').value = q.explanation ?? "";
+    $('f_image').value = q.image ?? "";
+  }
+
+  function clearForm(){
+    selectedId = null;
+    $('f_id').value = "";
+    $('f_year').value = "";
+    $('f_label').value = "";
+    $('f_category').value = "";
+    $('f_type').value = "multi_blank";
+    $('f_orderMatters').value = "false";
+    $('f_question').value = "";
+    $('f_choices').value = "";
+    $('f_answers').value = "";
+    $('f_explanation').value = "";
+    $('f_image').value = "";
+    $('btnUpdate').disabled = true;
+    $('btnDelete').disabled = true;
+  }
+
+  function selectForEdit(id){
+    const q = data.find(x=>x.id===id);
+    if(!q){ log(`ID ${id} が見つかりません。`, "ng"); return; }
+    selectedId = id;
+    objectToForm(q);
+    $('btnUpdate').disabled = false;
+    $('btnDelete').disabled = false;
+    renderList();
+    log(`編集対象を選択：${id}`, "ok");
+  }
+
+  function addNew(){
+    const obj = formToObject();
+    const nq = normalizeOne(obj); // adds id
+    data.push(nq);
+    setDirty(true);
+    renderList();
+    selectForEdit(nq.id);
+    log(`追加しました：${nq.id}`, "ok");
+  }
+
+  function updateSelected(){
+    if(!selectedId){ log("編集対象が未選択です。", "ng"); return; }
+    const idx = data.findIndex(x=>x.id===selectedId);
+    if(idx<0){ log("編集対象が見つかりません。", "ng"); return; }
+    const obj = formToObject();
+    obj.id = selectedId; // keep id
+    const nq = normalizeOne(obj);
+    nq.id = selectedId;
+    data[idx] = nq;
+    setDirty(true);
+    renderList();
+    log(`更新しました：${selectedId}`, "ok");
+  }
+
+  function deleteById(id){
+    if(!id) return;
+    const ok = confirm(`削除しますか？\nID: ${id}`);
+    if(!ok) return;
+    const before = data.length;
+    data = data.filter(x=>x.id!==id);
+    if(selectedId===id) clearForm();
+    if(data.length!==before){
+      setDirty(true);
+      renderList();
+      log(`削除しました：${id}`, "ok");
+    }else{
+      log(`削除対象が見つかりません：${id}`, "ng");
+    }
+  }
+
+  // --- Load / Import / Download ---
+  async function loadFromFetch(){
+    try{
+      const res = await fetch("./questions.json", {cache:"no-store"});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if(!Array.isArray(json)) throw new Error("questions.json が配列ではありません。");
+      original = json;
+      data = [...json];
+      setDirty(false);
+      clearForm();
+      renderList();
+      log("questions.json を読み込みました（fetch）。", "ok");
+    }catch(e){
+      log(`読み込み失敗：${e.message}`, "ng");
+      alert("questions.json の読み込みに失敗しました。\n・同じフォルダに questions.json があるか\n・GitHub Pagesで公開されているか\nを確認してください。");
+    }
+  }
+
+  function importFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      const parsed = safeJsonParse(reader.result);
+      if(!parsed.ok){
+        log(`JSON解析エラー：${parsed.err.message}`, "ng");
+        alert("JSONが壊れています。");
+        return;
+      }
+      if(!Array.isArray(parsed.json)){
+        log("読み込んだJSONが配列ではありません。", "ng");
+        alert("配列形式の questions.json を選んでください。");
+        return;
+      }
+      original = parsed.json;
+      data = [...parsed.json];
+      setDirty(false);
+      clearForm();
+      renderList();
+      log("ファイルから questions.json を読み込みました。", "ok");
+    };
+    reader.readAsText(file, "utf-8");
+  }
+
+  function downloadQuestions(){
+    // keep stable output: array only
+    const out = JSON.stringify(data, null, 2);
+    const blob = new Blob([out], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "questions.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    log("questions.json をダウンロードしました。GitHubで差し替えてコミットしてください。", "ok");
+  }
+
+  function validate(){
+    const errs = [];
+    data.forEach((q,i)=>{
+      if(!q.year) errs.push(`#${i} year が空`);
+      if(!q.label) errs.push(`#${i} label が空`);
+      if(!q.category) errs.push(`#${i} category が空`);
+      if(!q.question) errs.push(`#${i} question が空`);
+      if(!Array.isArray(q.choices)) errs.push(`#${i} choices が配列でない`);
+      if(!Array.isArray(q.answers)) errs.push(`#${i} answers が配列でない`);
+      // answers range check
+      if(Array.isArray(q.answers) && Array.isArray(q.choices)){
+        q.answers.forEach(a=>{
+          if(!Number.isInteger(a)) errs.push(`#${i} answers に整数以外`);
+          else if(a<0 || a>=q.choices.length) errs.push(`#${i} answers index範囲外 (${a})`);
+        });
+      }
+      if(typeof q.orderMatters !== "boolean") errs.push(`#${i} orderMatters がbooleanでない`);
+      if(!q.id) errs.push(`#${i} id が空（正規化で付与できます）`);
+    });
+    if(errs.length===0){
+      log("整合性チェック：OK（問題なし）", "ok");
+      alert("整合性チェック：OK（問題なし）");
+    }else{
+      log(`整合性チェック：NG（${errs.length}件）`, "ng");
+      alert("整合性チェック：NG\n\n" + errs.slice(0,20).join("\n") + (errs.length>20 ? "\n…（一部省略）" : ""));
+    }
+  }
+
+  function backup(){
+    localStorage.setItem("study_questions_backup", JSON.stringify(data));
+    log("localStorage に一時保存しました。", "ok");
+  }
+  function restore(){
+    const s = localStorage.getItem("study_questions_backup");
+    if(!s){ log("一時保存がありません。", "ng"); alert("一時保存がありません。"); return; }
+    const parsed = safeJsonParse(s);
+    if(!parsed.ok || !Array.isArray(parsed.json)){
+      log("一時保存の復元に失敗しました。", "ng"); alert("復元に失敗しました。");
+      return;
+    }
+    data = parsed.json;
+    setDirty(true);
+    clearForm();
+    renderList();
+    log("一時保存から復元しました。", "ok");
+  }
+
+  function clearAll(){
+    const ok = confirm("初期化しますか？（読み込み前の状態に戻します）");
+    if(!ok) return;
+    data = [];
+    original = null;
+    setDirty(false);
+    clearForm();
+    renderList();
+    log("初期化しました。", "ok");
+  }
+
+  function exportOne(){
+    if(!selectedId){ alert("編集対象が未選択です（一覧で編集を押してください）"); return; }
+    const q = data.find(x=>x.id===selectedId);
+    if(!q) return;
+    previewEl.textContent = JSON.stringify(q,null,2);
+    log(`選択中のJSONを表示：${selectedId}`, "ok");
+  }
+
+  // Wire events
+  $('btnLoad').onclick = loadFromFetch;
+  $('fileImport').addEventListener('change', (e)=>{
+    const f = e.target.files?.[0];
+    if(f) importFile(f);
+    e.target.value = "";
+  });
+
+  $('btnDownload').onclick = downloadQuestions;
+  $('btnValidate').onclick = validate;
+  $('btnBackup').onclick = backup;
+  $('btnRestore').onclick = restore;
+  $('btnClear').onclick = clearAll;
+
+  $('btnAdd').onclick = addNew;
+  $('btnUpdate').onclick = updateSelected;
+  $('btnDelete').onclick = ()=> deleteById(selectedId);
+  $('btnResetForm').onclick = clearForm;
+
+  $('btnNormalize').onclick = normalizeAll;
+  $('btnExportOne').onclick = exportOne;
+
+  $('q_search').addEventListener('input', renderList);
+  $('q_sort').addEventListener('change', renderList);
+
+  // initial hint
+  log("まずは「questions.json を読み込む」または「ファイル選択」で読み込んでください。");
+  renderList();
+})();
+</script>
+</body>
+</html>
